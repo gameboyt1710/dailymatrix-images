@@ -192,6 +192,16 @@ app.get('/i/:id', (req, res) => {
     return res.status(404).send('Not found');
   }
 
+  // Get image extension for content type
+  const ext = path.extname(record.filename).toLowerCase();
+  const imageTypes = {
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.webp': 'image/webp'
+  };
+  const imageType = imageTypes[ext] || 'image/jpeg';
+
   const imageUrl = `${BASE_URL}/img/${id}`;
   const pageUrl = `${BASE_URL}/i/${id}`;
 
@@ -206,14 +216,17 @@ app.get('/i/:id', (req, res) => {
   <meta property="og:title" content="Artwork">
   <meta property="og:description" content="Shared via The Daily Matrix">
   <meta property="og:image" content="${imageUrl}">
+  <meta property="og:image:type" content="${imageType}">
   <meta property="og:url" content="${pageUrl}">
   <meta property="og:type" content="website">
+  <meta property="og:site_name" content="The Daily Matrix">
   
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Artwork">
   <meta name="twitter:description" content="Shared via The Daily Matrix">
   <meta name="twitter:image" content="${imageUrl}">
+  <meta name="twitter:image:src" content="${imageUrl}">
   
   <style>
     body { font-family: system-ui, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; text-align: center; }
