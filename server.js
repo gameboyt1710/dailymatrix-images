@@ -22,31 +22,48 @@ if (!process.env.DATABASE_URL) {
 // PostgreSQL connection (Railway auto-provides DATABASE_URL)
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
+  ssl: process.env.DATABASE_URL?.includes('localhost') ? false : { rejectUnauthorized: false },
+  max: 10,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 10000,
+});
+
+// Test database connection
+pool.on('error', (err) => {
+  console.error('Unexpected database error:', err);
 });
 
 // Initialize database table
 async function initDB() {
-  try {
-    const client = await pool.connect();
+  let retries = 5;
+  while (retries > 0) {
     try {
-      await client.query(`
-        CREATE TABLE IF NOT EXISTS images (
-          id TEXT PRIMARY KEY,
-          filename TEXT NOT NULL,
-          data BYTEA NOT NULL,
-          mimetype TEXT NOT NULL,
-          created_at TIMESTAMP DEFAULT NOW()
-        )
-      `);
-      console.log('✅ Database initialized successfully');
-    } finally {
-      client.release();
+      const client = await pool.connect();
+      try {
+        await client.query(`
+          CREATE TABLE IF NOT EXISTS images (
+            id TEXT PRIMARY KEY,
+            filename TEXT NOT NULL,
+            data BYTEA NOT NULL,
+            mimetype TEXT NOT NULL,
+            created_at TIMESTAMP DEFAULT NOW()
+          )
+        `);
+        console.log('✅ Database initialized successfully');
+        return;
+      } finally {
+        client.release();
+      }
+    } catch (err) {
+      retries--;
+      console.error(`❌ Database init error (${5 - retries}/5):`, err.message);
+      if (retries === 0) {
+        console.error('Failed to connect to database after 5 attempts');
+        console.error('DATABASE_URL:', process.env.DATABASE_URL ? 'Set (hidden)' : 'Not set');
+        process.exit(1);
+      }
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2s before retry
     }
-  } catch (err) {
-    console.error('❌ Database init error:', err.message);
-    console.error('Make sure PostgreSQL is added to your Railway project');
-    process.exit(1);
   }
 }
 
