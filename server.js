@@ -359,15 +359,16 @@ app.get('/i/:id', async (req, res) => {
   <title>Image</title>
   
   <!-- Open Graph -->
-  <meta property="og:title" content=" ">
-  <meta property="og:image" content="${imageUrl}">
-  <meta property="og:image:type" content="${imageType}">
-  <meta property="og:url" content="${pageUrl}">
   <meta property="og:type" content="website">
+  <meta property="og:url" content="${pageUrl}">
+  <meta property="og:image" content="${imageUrl}">
+  <meta property="og:image:secure_url" content="${imageUrl}">
+  <meta property="og:image:type" content="${imageType}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
   
   <!-- Twitter Card -->
   <meta name="twitter:card" content="${cardType}">
-  <meta name="twitter:title" content=" ">
   <meta name="twitter:image" content="${imageUrl}">
   
   <style>
