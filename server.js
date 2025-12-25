@@ -9,6 +9,16 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const BASE_URL = process.env.BASE_URL || 'https://thedailymatrix.com';
 
+// Check if DATABASE_URL is provided
+if (!process.env.DATABASE_URL) {
+  console.error('ERROR: DATABASE_URL environment variable is not set!');
+  console.error('Please add a PostgreSQL database in Railway:');
+  console.error('1. Click "+ New" in your Railway project');
+  console.error('2. Select "Database" → "Add PostgreSQL"');
+  console.error('3. Railway will automatically set DATABASE_URL');
+  process.exit(1);
+}
+
 // PostgreSQL connection (Railway auto-provides DATABASE_URL)
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -17,22 +27,26 @@ const pool = new Pool({
 
 // Initialize database table
 async function initDB() {
-  const client = await pool.connect();
   try {
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS images (
-        id TEXT PRIMARY KEY,
-        filename TEXT NOT NULL,
-        data BYTEA NOT NULL,
-        mimetype TEXT NOT NULL,
-        created_at TIMESTAMP DEFAULT NOW()
-      )
-    `);
-    console.log('Database initialized');
+    const client = await pool.connect();
+    try {
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS images (
+          id TEXT PRIMARY KEY,
+          filename TEXT NOT NULL,
+          data BYTEA NOT NULL,
+          mimetype TEXT NOT NULL,
+          created_at TIMESTAMP DEFAULT NOW()
+        )
+      `);
+      console.log('✅ Database initialized successfully');
+    } finally {
+      client.release();
+    }
   } catch (err) {
-    console.error('Database init error:', err);
-  } finally {
-    client.release();
+    console.error('❌ Database init error:', err.message);
+    console.error('Make sure PostgreSQL is added to your Railway project');
+    process.exit(1);
   }
 }
 
