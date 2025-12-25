@@ -2,27 +2,27 @@
 
 Upload an image → get a URL → paste in tweet → Twitter shows image as link preview.
 
-## Setup Cloudinary (Required for Production)
-
-1. Sign up for free at [cloudinary.com](https://cloudinary.com)
-2. Get your **CLOUDINARY_URL** from the dashboard (looks like: `cloudinary://key:secret@cloud_name`)
-3. Add it as an environment variable in Railway
-
-## Deploy to Railway
+## Deploy to Railway (with persistent storage)
 
 1. Push this folder to a GitHub repo
 2. Go to [railway.app](https://railway.app) and sign in with GitHub
 3. Click "New Project" → "Deploy from GitHub repo" → select your repo
-4. Go to your project → "Variables" tab → add:
+4. **Add a Volume for persistent storage:**
+   - Click on your service
+   - Go to **"Settings"** tab
+   - Scroll down to **"Volumes"** section
+   - Click **"+ New Volume"**
+   - Mount Path: `/data`
+   - Click **"Add"**
+5. Add environment variables in **"Variables"** tab:
    ```
    BASE_URL=https://thedailymatrix.com
-   CLOUDINARY_URL=cloudinary://your_key:your_secret@your_cloud_name
+   STORAGE_PATH=/data
    ```
-   (or use the Railway-provided domain like `https://yourapp.up.railway.app`)
-5. Railway auto-detects Node.js and runs `npm start`
-6. Add your custom domain in Settings if needed
+6. Railway will redeploy automatically
+7. Add your custom domain in **Settings → Networking** if needed
 
-## Deploy to Render
+## Deploy to Render (with persistent disk)
 
 1. Push this folder to a GitHub repo
 2. Go to [render.com](https://render.com) and sign in with GitHub
@@ -30,13 +30,18 @@ Upload an image → get a URL → paste in tweet → Twitter shows image as link
 4. Settings:
    - Build Command: `npm install`
    - Start Command: `npm start`
-5. Add environment variables:
+5. **Add a Disk for persistent storage:**
+   - Scroll to **"Disks"** section
+   - Click **"Add Disk"**
+   - Name: `storage`
+   - Mount Path: `/data`
+   - Size: 1GB (free tier)
+6. Add environment variables:
    ```
    BASE_URL=https://thedailymatrix.com
-   CLOUDINARY_URL=cloudinary://your_key:your_secret@your_cloud_name
+   STORAGE_PATH=/data
    ```
-6. Click "Create Web Service"
-7. Add custom domain in Settings if needed
+7. Click "Create Web Service"
 
 ## Local Testing
 
