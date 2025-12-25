@@ -3,17 +3,25 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
+const cloudinary = require('cloudinary').v2;
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const BASE_URL = process.env.BASE_URL || 'https://thedailymatrix.com';
+
+// Configure Cloudinary (uses env vars: CLOUDINARY_URL or CLOUDINARY_CLOUD_NAME, etc.)
+if (process.env.CLOUDINARY_URL) {
+  cloudinary.config({
+    cloudinary_url: process.env.CLOUDINARY_URL
+  });
+}
 
 // Use STORAGE_PATH env var for persistent storage (e.g., Railway Volume)
 const STORAGE_PATH = process.env.STORAGE_PATH || __dirname;
 const UPLOADS_DIR = path.join(STORAGE_PATH, 'uploads');
 const DATA_FILE = path.join(STORAGE_PATH, 'data.json');
 
-// Ensure uploads directory exists
+// Ensure uploads directory exists (for local temp storage before Cloudinary upload)
 if (!fs.existsSync(UPLOADS_DIR)) {
   fs.mkdirSync(UPLOADS_DIR, { recursive: true });
 }
@@ -111,19 +119,40 @@ app.get('/', (req, res) => {
 });
 
 // POST /upload - Handle file upload
-app.post('/upload', upload.single('file'), (req, res) => {
+app.post('/upload', upload.single('file'), async (req, res) => {
   if (!req.file) {
     return res.status(400).send('No file uploaded or invalid file type.');
   }
 
   const id = req.generatedId;
   const filename = req.file.filename;
+  const localPath = req.file.path;
+
+  let imageUrl = `/img/${id}`; // Default to local
+
+  // Upload to Cloudinary if configured
+  if (process.env.CLOUDINARY_URL) {
+    try {
+      const result = await cloudinary.uploader.upload(localPath, {
+        public_id: id,
+        folder: 'dailymatrix'
+      });
+      imageUrl = result.secure_url;
+      
+      // Delete local file after Cloudinary upload
+      fs.unlinkSync(localPath);
+    } catch (err) {
+      console.error('Cloudinary upload failed:', err);
+      // Fall back to local storage
+    }
+  }
 
   // Load current data, add new record, save
   const data = loadData();
   data[id] = {
     id,
     filename,
+    imageUrl, // Store the full Cloudinary URL or local path
     createdAt: new Date().toISOString()
   };
   saveData(data);
@@ -204,7 +233,10 @@ app.get('/i/:id', (req, res) => {
   };
   const imageType = imageTypes[ext] || 'image/jpeg';
 
-  const imageUrl = `${BASE_URL}/img/${id}`;
+  // Use Cloudinary URL if available, otherwise local
+  const imageUrl = record.imageUrl && record.imageUrl.startsWith('http') 
+    ? record.imageUrl 
+    : `${BASE_URL}/img/${id}`;
   const pageUrl = `${BASE_URL}/i/${id}`;
 
   res.send(`<!DOCTYPE html>
@@ -237,7 +269,7 @@ app.get('/i/:id', (req, res) => {
   </style>
 </head>
 <body>
-  <img src="/img/${id}" alt="Artwork">
+  <img src="${imageUrl}" alt="Artwork">
   <p class="caption">Shared via The Daily Matrix</p>
 </body>
 </html>`);
