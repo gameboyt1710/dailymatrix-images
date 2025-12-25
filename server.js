@@ -51,6 +51,13 @@ async function initDB() {
             created_at TIMESTAMP DEFAULT NOW()
           )
         `);
+        
+        // Add card_size column if it doesn't exist (for existing tables)
+        await client.query(`
+          ALTER TABLE images 
+          ADD COLUMN IF NOT EXISTS card_size TEXT DEFAULT 'large'
+        `);
+        
         console.log('✅ Database initialized successfully');
         return;
       } finally {
