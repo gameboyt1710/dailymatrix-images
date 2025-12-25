@@ -356,21 +356,16 @@ app.get('/i/:id', async (req, res) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Artwork - The Daily Matrix</title>
+  <title>Image</title>
   
   <!-- Open Graph -->
-  <meta property="og:title" content="Artwork">
-  <meta property="og:description" content="Shared via The Daily Matrix">
   <meta property="og:image" content="${imageUrl}">
   <meta property="og:image:type" content="${imageType}">
   <meta property="og:url" content="${pageUrl}">
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="The Daily Matrix">
   
   <!-- Twitter Card -->
   <meta name="twitter:card" content="${cardType}">
-  <meta name="twitter:title" content="Artwork">
-  <meta name="twitter:description" content="Shared via The Daily Matrix">
   <meta name="twitter:image" content="${imageUrl}">
   <meta name="twitter:image:src" content="${imageUrl}">
   
