@@ -3,42 +3,43 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
+const { Pool } = require('pg');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const BASE_URL = process.env.BASE_URL || 'https://thedailymatrix.com';
 
-// Use STORAGE_PATH env var for persistent storage (Railway Volume)
-const STORAGE_PATH = process.env.STORAGE_PATH || __dirname;
-const UPLOADS_DIR = path.join(STORAGE_PATH, 'uploads');
-const DATA_FILE = path.join(STORAGE_PATH, 'data.json');
+// PostgreSQL connection (Railway auto-provides DATABASE_URL)
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false
+});
 
-// Ensure uploads directory exists
-if (!fs.existsSync(UPLOADS_DIR)) {
-  fs.mkdirSync(UPLOADS_DIR, { recursive: true });
-}
-
-// Ensure data.json exists
-if (!fs.existsSync(DATA_FILE)) {
-  fs.writeFileSync(DATA_FILE, '{}', 'utf8');
-}
-
-// Load data from JSON file
-function loadData() {
+// Initialize database table
+async function initDB() {
+  const client = await pool.connect();
   try {
-    const raw = fs.readFileSync(DATA_FILE, 'utf8');
-    return JSON.parse(raw);
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS images (
+        id TEXT PRIMARY KEY,
+        filename TEXT NOT NULL,
+        data BYTEA NOT NULL,
+        mimetype TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT NOW()
+      )
+    `);
+    console.log('Database initialized');
   } catch (err) {
-    return {};
+    console.error('Database init error:', err);
+  } finally {
+    client.release();
   }
 }
 
-// Save data to JSON file
-function saveData(data) {
-  const tempFile = DATA_FILE + '.tmp';
-  fs.writeFileSync(tempFile, JSON.stringify(data, null, 2), 'utf8');
-  fs.renameSync(tempFile, DATA_FILE);
-}
+initDB();
+
+// Use memory storage for multer (we'll store in DB)
+const storage = multer.memoryStorage();
 
 // Generate a random ID
 function generateId(length = 8) {
@@ -47,24 +48,10 @@ function generateId(length = 8) {
 
 // Allowed image extensions and MIME types
 const ALLOWED_TYPES = {
-  'image/png': '.png',
-  'image/jpeg': '.jpg',
-  'image/webp': '.webp'
+  'image/png': 'image/png',
+  'image/jpeg': 'image/jpeg',
+  'image/webp': 'image/webp'
 };
-
-// Configure multer storage
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, UPLOADS_DIR);
-  },
-  filename: (req, file, cb) => {
-    const ext = ALLOWED_TYPES[file.mimetype];
-    const id = generateId();
-    req.generatedId = id;
-    req.fileExt = ext;
-    cb(null, `${id}${ext}`);
-  }
-});
 
 // File filter to only allow images
 const fileFilter = (req, file, cb) => {
@@ -111,34 +98,46 @@ app.get('/', (req, res) => {
 });
 
 // POST /upload - Handle file upload
-app.post('/upload', upload.single('file'), (req, res) => {
+app.post('/upload', upload.single('file'), async (req, res) => {
   if (!req.file) {
     return res.status(400).send('No file uploaded or invalid file type.');
   }
 
-  const id = req.generatedId;
-  const filename = req.file.filename;
+  const id = generateId();
+  const filename = req.file.originalname;
+  const mimetype = req.file.mimetype;
+  const data = req.file.buffer;
 
-  // Load current data, add new record, save
-  const data = loadData();
-  data[id] = {
-    id,
-    filename,
-    createdAt: new Date().toISOString()
-  };
-  saveData(data);
-
-  res.redirect(`/success/${id}`);
+  // Store in database
+  const client = await pool.connect();
+  try {
+    await client.query(
+      'INSERT INTO images (id, filename, data, mimetype) VALUES ($1, $2, $3, $4)',
+      [id, filename, data, mimetype]
+    );
+    res.redirect(`/success/${id}`);
+  } catch (err) {
+    console.error('Database error:', err);
+    res.status(500).send('Upload failed');
+  } finally {
+    client.release();
+  }
 });
 
 // GET /success/:id - Show success page with shareable URL
-app.get('/success/:id', (req, res) => {
+app.get('/success/:id', async (req, res) => {
   const { id } = req.params;
-  const data = loadData();
-  const record = data[id];
 
-  if (!record) {
-    return res.status(404).send('Not found');
+  const client = await pool.connect();
+  try {
+    const result = await client.query('SELECT id FROM images WHERE id = $1', [id]);
+    if (result.rows.length === 0) {
+      return res.status(404).send('Not found');
+    }
+  } catch (err) {
+    return res.status(500).send('Database error');
+  } finally {
+    client.release();
   }
 
   const shareUrl = `${BASE_URL}/i/${id}`;
@@ -185,29 +184,23 @@ app.get('/success/:id', (req, res) => {
 });
 
 // GET /i/:id - Image page with Open Graph meta tags (this is what Twitter reads)
-app.get('/i/:id', (req, res) => {
+app.get('/i/:id', async (req, res) => {
   const { id } = req.params;
-  const data = loadData();
-  const record = data[id];
 
-  if (!record) {
-    return res.status(404).send('Not found');
-  }
+  const client = await pool.connect();
+  try {
+    const result = await client.query('SELECT filename, mimetype FROM images WHERE id = $1', [id]);
+    if (result.rows.length === 0) {
+      return res.status(404).send('Not found');
+    }
 
-  // Get image extension for content type
-  const ext = path.extname(record.filename).toLowerCase();
-  const imageTypes = {
-    '.png': 'image/png',
-    '.jpg': 'image/jpeg',
-    '.jpeg': 'image/jpeg',
-    '.webp': 'image/webp'
-  };
-  const imageType = imageTypes[ext] || 'image/jpeg';
+    const record = result.rows[0];
+    const imageType = record.mimetype;
 
-  const imageUrl = `${BASE_URL}/img/${id}`;
-  const pageUrl = `${BASE_URL}/i/${id}`;
+    const imageUrl = `${BASE_URL}/img/${id}`;
+    const pageUrl = `${BASE_URL}/i/${id}`;
 
-  res.send(`<!DOCTYPE html>
+    res.send(`<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -241,39 +234,33 @@ app.get('/i/:id', (req, res) => {
   <p class="caption">Shared via The Daily Matrix</p>
 </body>
 </html>`);
+  } catch (err) {
+    res.status(500).send('Database error');
+  } finally {
+    client.release();
+  }
 });
 
 // GET /img/:id - Serve the actual image file
-app.get('/img/:id', (req, res) => {
+app.get('/img/:id', async (req, res) => {
   const { id } = req.params;
-  const data = loadData();
-  const record = data[id];
 
-  if (!record) {
-    return res.status(404).send('Not found');
+  const client = await pool.connect();
+  try {
+    const result = await client.query('SELECT data, mimetype FROM images WHERE id = $1', [id]);
+    if (result.rows.length === 0) {
+      return res.status(404).send('Not found');
+    }
+
+    const record = result.rows[0];
+    res.setHeader('Content-Type', record.mimetype);
+    res.setHeader('Cache-Control', 'public, max-age=31536000');
+    res.send(record.data);
+  } catch (err) {
+    res.status(500).send('Database error');
+  } finally {
+    client.release();
   }
-
-  const filePath = path.join(UPLOADS_DIR, record.filename);
-
-  if (!fs.existsSync(filePath)) {
-    return res.status(404).send('Image not found');
-  }
-
-  // Determine content type from extension
-  const ext = path.extname(record.filename).toLowerCase();
-  const contentTypes = {
-    '.png': 'image/png',
-    '.jpg': 'image/jpeg',
-    '.jpeg': 'image/jpeg',
-    '.webp': 'image/webp'
-  };
-
-  const contentType = contentTypes[ext] || 'application/octet-stream';
-  res.setHeader('Content-Type', contentType);
-  res.setHeader('Cache-Control', 'public, max-age=31536000');
-
-  const stream = fs.createReadStream(filePath);
-  stream.pipe(res);
 });
 
 // Error handling middleware
