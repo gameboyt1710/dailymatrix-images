@@ -1,0 +1,15 @@
+# Dependencies
+node_modules/
+
+# Uploaded images (keep folder but ignore contents)
+uploads/*
+!uploads/.gitkeep
+
+# Data store
+data.json
+
+# Environment
+.env
+
+# OS files
+.DS_Store
