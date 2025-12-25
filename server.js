@@ -248,7 +248,7 @@ app.get('/i/:id', async (req, res) => {
   <meta property="og:site_name" content="The Daily Matrix">
   
   <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Artwork">
   <meta name="twitter:description" content="Shared via The Daily Matrix">
   <meta name="twitter:image" content="${imageUrl}">
