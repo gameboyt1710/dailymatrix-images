@@ -8,8 +8,10 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const BASE_URL = process.env.BASE_URL || 'https://thedailymatrix.com';
 
-const UPLOADS_DIR = path.join(__dirname, 'uploads');
-const DATA_FILE = path.join(__dirname, 'data.json');
+// Use STORAGE_PATH env var for persistent storage (e.g., Railway Volume)
+const STORAGE_PATH = process.env.STORAGE_PATH || __dirname;
+const UPLOADS_DIR = path.join(STORAGE_PATH, 'uploads');
+const DATA_FILE = path.join(STORAGE_PATH, 'data.json');
 
 // Ensure uploads directory exists
 if (!fs.existsSync(UPLOADS_DIR)) {
