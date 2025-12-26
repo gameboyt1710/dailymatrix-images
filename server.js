@@ -131,20 +131,25 @@ app.get('/', (req, res) => {
   </div>
   ` : '';
 
-  // Generate floating artist handles (staggered on the sides)
+  // Generate floating artist handles (waterfall pattern on the sides)
   const positions = [
-    { left: '8%', top: '15%' },
-    { left: '5%', top: '45%' },
-    { left: '10%', top: '70%' },
-    { right: '8%', top: '20%' },
-    { right: '6%', top: '50%' },
-    { right: '10%', top: '75%' },
+    { left: '5%', top: '10%', delay: '0s' },
+    { left: '7%', top: '30%', delay: '1.5s' },
+    { left: '4%', top: '50%', delay: '3s' },
+    { left: '8%', top: '70%', delay: '4.5s' },
+    { right: '5%', top: '15%', delay: '0.8s' },
+    { right: '7%', top: '35%', delay: '2.3s' },
+    { right: '4%', top: '55%', delay: '3.8s' },
+    { right: '8%', top: '75%', delay: '5.3s' },
   ];
   
   const floatingHTML = ARTIST_SPOTLIGHTS.length > 0 
     ? ARTIST_SPOTLIGHTS.slice(0, positions.length).map((artist, i) => {
-        const pos = positions[i];
-        const style = Object.entries(pos).map(([k, v]) => `${k}: ${v}`).join('; ');
+        const pos = positions[i % positions.length];
+        const style = Object.entries(pos)
+          .filter(([k]) => k !== 'delay')
+          .map(([k, v]) => `${k}: ${v}`)
+          .join('; ') + `; animation-delay: ${pos.delay}`;
         return `
     <div class="floating-artist" style="${style}">
       <a href="${artist.link}" target="_blank" rel="noopener noreferrer">${artist.handle}</a>
@@ -319,26 +324,43 @@ app.get('/', (req, res) => {
       background: var(--button-hover);
     }
 
-    /* Floating artist handles on the sides */
+    /* Animated waterfall of artist handles on the sides */
+    @keyframes float-down {
+      0% {
+        transform: translateY(-20px);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.9;
+      }
+      90% {
+        opacity: 0.9;
+      }
+      100% {
+        transform: translateY(20px);
+        opacity: 0;
+      }
+    }
+
     .floating-artist {
       position: fixed;
       z-index: 0;
-      font-size: 0.9em;
-      opacity: 0.6;
-      transition: opacity 0.2s;
-    }
-
-    .floating-artist:hover {
-      opacity: 1;
+      font-size: 1.1em;
+      font-weight: 500;
+      animation: float-down 8s ease-in-out infinite;
     }
 
     .floating-artist a {
-      color: var(--link-color);
+      color: #1d9bf0;
       text-decoration: none;
+      text-shadow: 0 0 10px rgba(29, 155, 240, 0.3);
+      transition: all 0.2s;
     }
 
     .floating-artist a:hover {
       text-decoration: underline;
+      text-shadow: 0 0 20px rgba(29, 155, 240, 0.6);
+      transform: scale(1.1);
     }
 
     @media (max-width: 1200px) {
