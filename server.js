@@ -432,13 +432,88 @@ app.get('/success/:id', async (req, res) => {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Upload Success</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
-    h1 { color: #28a745; }
-    .url-box { background: #f4f4f4; padding: 15px; border-radius: 4px; margin: 20px 0; word-break: break-all; }
-    button { background: #007bff; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; }
-    button:hover { background: #0056b3; }
-    .copied { background: #28a745; }
-    a { color: #007bff; }
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #333333;
+      --heading-color: #28a745;
+      --box-bg: #f4f4f4;
+      --button-bg: #007bff;
+      --button-hover: #0056b3;
+      --button-success: #28a745;
+      --link-color: #007bff;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #1a1a1a;
+        --text-color: #e0e0e0;
+        --heading-color: #4ade80;
+        --box-bg: #2a2a2a;
+        --button-bg: #0d6efd;
+        --button-hover: #0b5ed7;
+        --button-success: #22c55e;
+        --link-color: #60a5fa;
+      }
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      max-width: 650px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    h1 {
+      color: var(--heading-color);
+    }
+
+    .url-box {
+      background: var(--box-bg);
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+      word-break: break-all;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 0.95em;
+    }
+
+    button {
+      background: var(--button-bg);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      cursor: pointer;
+      border-radius: 6px;
+      font-size: 1em;
+      font-weight: 500;
+      transition: background-color 0.2s;
+    }
+
+    button:hover {
+      background: var(--button-hover);
+    }
+
+    button.copied {
+      background: var(--button-success);
+    }
+
+    a {
+      color: var(--link-color);
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+
+    a:hover {
+      opacity: 0.8;
+      text-decoration: underline;
+    }
+
+    p {
+      margin: 15px 0;
+    }
   </style>
 </head>
 <body>
@@ -509,9 +584,35 @@ app.get('/i/:id', async (req, res) => {
   <meta property="og:image:height" content="630">
   
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; text-align: center; }
-    img { max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-    .caption { margin-top: 20px; color: #666; }
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #333333;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #1a1a1a;
+        --text-color: #e0e0e0;
+      }
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      text-align: center;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+    }
   </style>
 </head>
 <body>
