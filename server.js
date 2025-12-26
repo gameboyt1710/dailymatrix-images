@@ -10,6 +10,17 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const BASE_URL = process.env.BASE_URL || 'https://thedailymatrix.com';
 
+// Artist Spotlights - Update these to feature different artists!
+const ARTIST_SPOTLIGHTS = [
+  {
+    name: 'Artist Name',
+    link: 'https://twitter.com/artist',
+    image: 'https://example.com/artist-work.jpg',
+    description: 'Beautiful digital art and illustrations'
+  },
+  // Add more artists here
+];
+
 // Check if DATABASE_URL is provided
 if (!process.env.DATABASE_URL) {
   console.error('ERROR: DATABASE_URL environment variable is not set!');
@@ -110,6 +121,22 @@ const upload = multer({
 
 // GET / - Upload form
 app.get('/', (req, res) => {
+  // Generate artist spotlight HTML
+  const artistSpotlightHTML = ARTIST_SPOTLIGHTS.length > 0 ? `
+  <div class="artist-spotlight">
+    <h2>✨ Featured Artists</h2>
+    ${ARTIST_SPOTLIGHTS.map(artist => `
+    <a href="${artist.link}" target="_blank" rel="noopener noreferrer" class="artist-card">
+      ${artist.image ? `<img src="${artist.image}" alt="${artist.name}">` : ''}
+      <div class="artist-info">
+        <h3>${artist.name}</h3>
+        <p>${artist.description}</p>
+      </div>
+    </a>
+    `).join('')}
+  </div>
+  ` : '';
+
   res.send(`<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -262,6 +289,63 @@ app.get('/', (req, res) => {
     button:hover {
       background: var(--button-hover);
     }
+
+    .artist-spotlight {
+      background: var(--info-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      margin: 30px 0;
+    }
+
+    .artist-spotlight h2 {
+      margin-top: 0;
+      font-size: 1.1em;
+      color: var(--heading-color);
+      margin-bottom: 15px;
+    }
+
+    .artist-card {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px;
+      background: var(--bg-color);
+      border-radius: 6px;
+      margin: 10px 0;
+      text-decoration: none;
+      color: var(--text-color);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .artist-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .artist-card img {
+      width: 80px;
+      height: 80px;
+      border-radius: 6px;
+      object-fit: cover;
+      border: 2px solid var(--border-color);
+    }
+
+    .artist-info {
+      flex: 1;
+    }
+
+    .artist-info h3 {
+      margin: 0 0 5px 0;
+      color: var(--heading-color);
+      font-size: 1em;
+    }
+
+    .artist-info p {
+      margin: 0;
+      font-size: 0.9em;
+      color: var(--secondary-text);
+    }
   </style>
 </head>
 <body>
@@ -303,6 +387,8 @@ app.get('/', (req, res) => {
 
     <button type="submit">Upload</button>
   </form>
+
+  ${artistSpotlightHTML}
 </body>
 </html>`);
 });
@@ -397,6 +483,11 @@ app.get('/success/:id', async (req, res) => {
 
   const shareUrl = `${BASE_URL}/i/${id}`;
 
+  // Pick a random artist to feature
+  const randomArtist = ARTIST_SPOTLIGHTS.length > 0 
+    ? ARTIST_SPOTLIGHTS[Math.floor(Math.random() * ARTIST_SPOTLIGHTS.length)]
+    : null;
+
   res.send(`<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -486,6 +577,54 @@ app.get('/success/:id', async (req, res) => {
     p {
       margin: 15px 0;
     }
+
+    .artist-feature {
+      margin-top: 30px;
+      padding: 20px;
+      background: var(--box-bg);
+      border-radius: 8px;
+      text-align: left;
+    }
+
+    .artist-feature h3 {
+      margin-top: 0;
+      font-size: 0.9em;
+      color: var(--text-color);
+      opacity: 0.8;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .artist-link {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      text-decoration: none;
+      color: var(--text-color);
+      transition: opacity 0.2s;
+    }
+
+    .artist-link:hover {
+      opacity: 0.8;
+    }
+
+    .artist-link img {
+      width: 60px;
+      height: 60px;
+      border-radius: 6px;
+      object-fit: cover;
+    }
+
+    .artist-link div h4 {
+      margin: 0 0 5px 0;
+      color: var(--link-color);
+    }
+
+    .artist-link div p {
+      margin: 0;
+      font-size: 0.9em;
+      opacity: 0.8;
+    }
   </style>
 </head>
 <body>
@@ -495,6 +634,20 @@ app.get('/success/:id', async (req, res) => {
   <button onclick="copyUrl()" id="copyBtn">Copy to Clipboard</button>
   <p style="margin-top: 20px;"><a href="${shareUrl}">Preview your link</a></p>
   <p><a href="/">Upload another image</a></p>
+
+  ${randomArtist ? `
+  <div class="artist-feature">
+    <h3>✨ Featured Artist</h3>
+    <a href="${randomArtist.link}" target="_blank" rel="noopener noreferrer" class="artist-link">
+      ${randomArtist.image ? `<img src="${randomArtist.image}" alt="${randomArtist.name}">` : ''}
+      <div>
+        <h4>${randomArtist.name}</h4>
+        <p>${randomArtist.description}</p>
+      </div>
+    </a>
+  </div>
+  ` : ''}
+
   <script>
     function copyUrl() {
       const url = document.getElementById('url').textContent;
