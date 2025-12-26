@@ -6,15 +6,18 @@ A browser extension that makes uploading images to Daily Matrix super easy!
 
 ### 🎯 Two Ways to Upload:
 
-1. **In-Tweet Upload Button** (Twitter/X only)
-   - Adds a "Daily Matrix" button directly in the tweet composer
-   - Click → select image → link automatically pastes into your tweet
-   - Perfect for quick uploads while composing tweets
+1. **In-Tweet Upload Button** (Twitter/X only) - **✨ RECOMMENDED!**
+   - A "Daily Matrix" button appears directly in the tweet composer toolbar
+   - Click → select image → **link automatically pastes into your tweet**
+   - No extra steps - just click, upload, done!
+   - The flow: Open tweet composer → Click Daily Matrix button → Select image → Link appears in tweet → Post!
 
 2. **Extension Popup** (Works anywhere)
    - Click the extension icon in your toolbar
    - Drag & drop or click to upload
-   - Copy the link and paste wherever you want
+   - Toggle padding option
+   - Submit your Twitter handle to join the rebellion
+   - Copy the link manually
 
 ## Installation
 

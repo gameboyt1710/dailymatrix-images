@@ -125,3 +125,49 @@ function showError(message) {
     errorDiv.classList.remove('show');
   }, 4000);
 }
+
+// Rebellion form submission
+const rebellionForm = document.getElementById('rebellionForm');
+const handleInput = document.getElementById('handleInput');
+const rebellionMessage = document.getElementById('rebellionMessage');
+
+rebellionForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const handle = handleInput.value.trim();
+  
+  // Basic validation
+  if (!handle.startsWith('@')) {
+    showRebellionMessage('⚠️ Handle must start with @', false);
+    return;
+  }
+  
+  try {
+    const response = await fetch('https://thedailymatrix.com/api/submit-artist', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ handle })
+    });
+    
+    const data = await response.json();
+    
+    if (response.ok) {
+      showRebellionMessage('✅ ' + data.message, true);
+      handleInput.value = '';
+    } else {
+      showRebellionMessage('⚠️ ' + data.error, false);
+    }
+  } catch (err) {
+    showRebellionMessage('❌ Failed to submit. Try again later.', false);
+  }
+});
+
+function showRebellionMessage(message, success) {
+  rebellionMessage.textContent = message;
+  rebellionMessage.style.background = success ? 'rgba(0, 255, 0, 0.1)' : 'rgba(255, 0, 0, 0.1)';
+  rebellionMessage.classList.add('show');
+  
+  setTimeout(() => {
+    rebellionMessage.classList.remove('show');
+  }, 4000);
+}

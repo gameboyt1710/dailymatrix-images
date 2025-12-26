@@ -12,7 +12,7 @@
     }
     
     body {
-      width: 350px;
+      width: 380px;
       padding: 20px;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background: #000;
@@ -158,6 +158,62 @@
     .error.show {
       display: block;
     }
+    
+    .section {
+      margin-top: 20px;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      font-size: 13px;
+    }
+    
+    .section h3 {
+      font-size: 14px;
+      margin-bottom: 10px;
+    }
+    
+    .rebellion-form {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    
+    .rebellion-form input {
+      flex: 1;
+      padding: 8px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(29, 155, 240, 0.3);
+      border-radius: 4px;
+      color: #fff;
+      font-size: 13px;
+    }
+    
+    .rebellion-form button {
+      padding: 8px 16px;
+      background: rgb(29, 155, 240);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 13px;
+    }
+    
+    .rebellion-form button:hover {
+      background: rgb(26, 140, 216);
+    }
+    
+    .rebellion-message {
+      margin-top: 8px;
+      padding: 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      display: none;
+    }
+    
+    .rebellion-message.show {
+      display: block;
+    }
   </style>
 </head>
 <body>
@@ -190,6 +246,27 @@
     <div style="font-weight: bold; margin-bottom: 8px;">✅ Upload successful!</div>
     <div class="result-url" id="resultUrl"></div>
     <button class="copy-btn" id="copyBtn">Copy Link</button>
+  </div>
+  
+  <div class="section">
+    <div style="text-align: center; opacity: 0.7; font-size: 12px;">
+      ☕ <a href="https://buymeacoffee.com/Shinypants" target="_blank" style="color: rgb(29, 155, 240);">Support this service</a> - hosting isn't free!
+    </div>
+  </div>
+  
+  <div class="section">
+    <h3>🔥 Join the Rebellion</h3>
+    <p style="opacity: 0.8; margin-bottom: 8px;">Add your Twitter handle to our artist spotlight!</p>
+    <form class="rebellion-form" id="rebellionForm">
+      <input 
+        type="text" 
+        id="handleInput" 
+        placeholder="@yourhandle" 
+        required
+      />
+      <button type="submit">Submit</button>
+    </form>
+    <div class="rebellion-message" id="rebellionMessage"></div>
   </div>
   
   <div class="footer">
