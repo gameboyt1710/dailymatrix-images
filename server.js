@@ -133,24 +133,28 @@ app.get('/', (req, res) => {
 
   // Generate infinite scrolling waterfall on the sides
   // Repeat the list enough times to ensure continuous scrolling
-  const repeatCount = 5;
+  const repeatCount = 8;
   const repeatedArtists = Array(repeatCount).fill(ARTIST_SPOTLIGHTS).flat();
   
   const floatingHTML = ARTIST_SPOTLIGHTS.length > 0 
     ? `
     <div class="artist-waterfall left">
       ${repeatedArtists.map((artist, i) => {
-        const offset = Math.random() * 60 - 30; // Random offset between -30px and +30px
+        const offset = Math.random() * 150; // Random offset between 0 and 150px
+        const verticalGap = 20 + Math.random() * 40; // Random gap between 20-60px
         return `
-        <a href="${artist.link}" target="_blank" rel="noopener noreferrer" style="margin-left: ${offset}px">${artist.handle}</a>
+        <a href="${artist.link}" target="_blank" rel="noopener noreferrer" 
+           style="transform: translateX(${offset}px); margin-bottom: ${verticalGap}px">${artist.handle}</a>
       `;
       }).join('')}
     </div>
     <div class="artist-waterfall right">
       ${repeatedArtists.map((artist, i) => {
-        const offset = Math.random() * 60 - 30; // Random offset between -30px and +30px
+        const offset = Math.random() * 150; // Random offset between 0 and 150px
+        const verticalGap = 20 + Math.random() * 40; // Random gap between 20-60px
         return `
-        <a href="${artist.link}" target="_blank" rel="noopener noreferrer" style="margin-right: ${offset}px">${artist.handle}</a>
+        <a href="${artist.link}" target="_blank" rel="noopener noreferrer" 
+           style="transform: translateX(-${offset}px); margin-bottom: ${verticalGap}px">${artist.handle}</a>
       `;
       }).join('')}
     </div>
@@ -339,19 +343,18 @@ app.get('/', (req, res) => {
       z-index: 0;
       display: flex;
       flex-direction: column;
-      gap: 25px;
-      animation: scroll-down 30s linear infinite;
+      animation: scroll-down 35s linear infinite;
     }
 
     .artist-waterfall.left {
-      left: 5%;
+      left: 3%;
       top: 0;
     }
 
     .artist-waterfall.right {
-      right: 5%;
+      right: 3%;
       top: 0;
-      animation-delay: -15s;
+      animation-delay: -17s;
     }
 
     .artist-waterfall a {
