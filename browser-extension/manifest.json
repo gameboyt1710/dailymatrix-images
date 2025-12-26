@@ -19,7 +19,6 @@
     "https://x.com/*",
     "https://thedailymatrix.com/*"
   ],
-  "data_collection_permissions": [],
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
