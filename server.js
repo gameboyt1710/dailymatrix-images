@@ -364,11 +364,18 @@ app.get('/i/:id', async (req, res) => {
   
   <!-- Twitter Card -->
   <meta name="twitter:card" content="${cardType}">
+  <meta name="twitter:site" content="@thedailymatrix">
+  <meta name="twitter:creator" content="@thedailymatrix">
   <meta name="twitter:image" content="${imageUrl}">
   
   <!-- Open Graph -->
+  <meta property="og:title" content="Image">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="${pageUrl}">
   <meta property="og:image" content="${imageUrl}">
   <meta property="og:image:type" content="${imageType}">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
   
   <style>
     body { font-family: system-ui, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; text-align: center; }
