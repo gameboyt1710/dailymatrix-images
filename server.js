@@ -321,8 +321,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
   let mimetype = req.file.mimetype;
   let imageBuffer = req.file.buffer;
 
-  // Get user preferences
-  const cardSize = req.body.cardSize || 'large'; // 'large' or 'square'
+  // Always use large card format (2:1 aspect ratio)
   const addPadding = req.body.padding === 'yes';
 
   // Process image if padding is requested
@@ -332,40 +331,25 @@ app.post('/upload', upload.single('file'), async (req, res) => {
       const metadata = await image.metadata();
       const { width, height } = metadata;
 
-      // Calculate target aspect ratio
-      const targetRatio = cardSize === 'square' ? 1 : 2; // 1:1 or 2:1
+      // Calculate target aspect ratio (2:1 for large cards)
+      const targetRatio = 2;
       const currentRatio = width / height;
 
       let newWidth, newHeight, bgWidth, bgHeight;
 
-      if (cardSize === 'square') {
-        // Make it 1:1
-        const maxDim = Math.max(width, height);
-        bgWidth = bgHeight = maxDim;
-        
-        // Calculate scaled dimensions to fit
-        if (width > height) {
-          newWidth = maxDim;
-          newHeight = Math.round(height * (maxDim / width));
-        } else {
-          newHeight = maxDim;
-          newWidth = Math.round(width * (maxDim / height));
-        }
+      // Create 2:1 aspect ratio with letterboxing/pillarboxing
+      if (currentRatio > targetRatio) {
+        // Image is wider than 2:1, fit to width
+        bgWidth = width;
+        bgHeight = Math.round(width / targetRatio);
+        newWidth = width;
+        newHeight = height;
       } else {
-        // Make it 2:1 (wide)
-        if (currentRatio > targetRatio) {
-          // Image is wider than 2:1, fit to width
-          bgWidth = width;
-          bgHeight = Math.round(width / targetRatio);
-          newWidth = width;
-          newHeight = height;
-        } else {
-          // Image is taller than 2:1, fit to height
-          bgHeight = height;
-          bgWidth = Math.round(height * targetRatio);
-          newWidth = width;
-          newHeight = height;
-        }
+        // Image is taller than 2:1, fit to height
+        bgHeight = height;
+        bgWidth = Math.round(height * targetRatio);
+        newWidth = width;
+        newHeight = height;
       }
 
       // Create canvas with black background and composite image
@@ -396,7 +380,7 @@ app.post('/upload', upload.single('file'), async (req, res) => {
   try {
     await client.query(
       'INSERT INTO images (id, filename, data, mimetype, card_size) VALUES ($1, $2, $3, $4, $5)',
-      [id, filename, imageBuffer, mimetype, cardSize]
+      [id, filename, imageBuffer, mimetype, 'large']
     );
     res.redirect(`/success/${id}`);
   } catch (err) {
@@ -551,14 +535,13 @@ app.get('/i/:id', async (req, res) => {
 
   const client = await pool.connect();
   try {
-    const result = await client.query('SELECT filename, mimetype, card_size FROM images WHERE id = $1', [id]);
+    const result = await client.query('SELECT filename, mimetype FROM images WHERE id = $1', [id]);
     if (result.rows.length === 0) {
       return res.status(404).send('Not found');
     }
 
     const record = result.rows[0];
     const imageType = record.mimetype;
-    const cardType = record.card_size === 'square' ? 'summary' : 'summary_large_image';
 
     const imageUrl = `${BASE_URL}/img/${id}`;
     const pageUrl = `${BASE_URL}/i/${id}`;
@@ -571,7 +554,7 @@ app.get('/i/:id', async (req, res) => {
   <title>Image</title>
   
   <!-- Twitter Card -->
-  <meta name="twitter:card" content="${cardType}">
+  <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="${imageUrl}">
   
   <!-- Open Graph -->
