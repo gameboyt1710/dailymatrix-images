@@ -1,15 +1,8 @@
 {
   "manifest_version": 3,
-  "browser_specific_settings": {
-    "gecko": {
-      "id": "twitart@thedailymatrix.com",
-      "strict_min_version": "109.0"
-    }
-  },
   "name": "The Daily Matrix - Quick Upload",
   "version": "1.0.0",
   "description": "Upload images directly from Twitter/X composer and get shareable links instantly",
-  "homepage_url": "https://thedailymatrix.com",
   "permissions": [
     "activeTab",
     "storage"
@@ -19,9 +12,6 @@
     "https://x.com/*",
     "https://thedailymatrix.com/*"
   ],
-  "data_collection_permissions": {
-    "deny_on_install": true
-  },
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
