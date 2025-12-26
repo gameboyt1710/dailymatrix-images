@@ -1,0 +1,22 @@
+/* Spinner animation for loading state */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.dailymatrix-spinner {
+  animation: spin 1s linear infinite;
+}
+
+/* Button styles to ensure it matches Twitter's design */
+.dailymatrix-upload-btn:hover {
+  background-color: rgba(29, 155, 240, 0.1) !important;
+}
+
+.dailymatrix-upload-btn:active {
+  background-color: rgba(29, 155, 240, 0.2) !important;
+}

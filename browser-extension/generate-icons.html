@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Generate Extension Icons</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 40px;
+      background: #000;
+      color: #fff;
+      text-align: center;
+    }
+    canvas {
+      border: 2px solid #1d9bf0;
+      margin: 20px 10px;
+      display: inline-block;
+    }
+    button {
+      padding: 15px 30px;
+      background: #1d9bf0;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 10px;
+    }
+    button:hover {
+      background: #1a8cd8;
+    }
+    .instructions {
+      max-width: 600px;
+      margin: 20px auto;
+      text-align: left;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+<body>
+  <h1>Daily Matrix Extension Icons</h1>
+  <p>Right-click each icon below and "Save image as..." to download</p>
+  
+  <div>
+    <canvas id="icon16" width="16" height="16"></canvas>
+    <canvas id="icon48" width="48" height="48"></canvas>
+    <canvas id="icon128" width="128" height="128"></canvas>
+  </div>
+  
+  <div class="instructions">
+    <h3>How to use these icons:</h3>
+    <ol>
+      <li>Right-click each icon above</li>
+      <li>Select "Save image as..."</li>
+      <li>Save as <code>icon16.png</code>, <code>icon48.png</code>, and <code>icon128.png</code></li>
+      <li>Place them in the <code>browser-extension</code> folder</li>
+      <li>Reload the extension in your browser</li>
+    </ol>
+    
+    <p><strong>Or use a design tool:</strong> Create custom 128x128 icon and use a tool like <a href="https://redketchup.io/icon-editor" target="_blank" style="color: #1d9bf0;">Icon Editor</a> to generate all sizes.</p>
+  </div>
+
+  <script>
+    // Generate icons with "DM" text and blue circle
+    function drawIcon(canvasId, size) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+      
+      // Black background
+      ctx.fillStyle = '#000000';
+      ctx.fillRect(0, 0, size, size);
+      
+      // Blue circle
+      ctx.fillStyle = '#1d9bf0';
+      ctx.beginPath();
+      ctx.arc(size / 2, size / 2, size * 0.4, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // White "DM" text
+      ctx.fillStyle = '#ffffff';
+      ctx.font = `bold ${size * 0.35}px Arial, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('DM', size / 2, size / 2);
+    }
+    
+    // Draw all icon sizes
+    drawIcon('icon16', 16);
+    drawIcon('icon48', 48);
+    drawIcon('icon128', 128);
+    
+    console.log('Icons generated! Right-click to save each one.');
+  </script>
+</body>
+</html>

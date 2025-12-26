@@ -1,0 +1,10 @@
+<!-- Temporary placeholder - replace with actual PNG icons -->
+<!-- You can convert this SVG to PNG using an online tool like: -->
+<!-- https://cloudconvert.com/svg-to-png -->
+<!-- Or use: iconsgenerator.com to create proper extension icons -->
+
+<svg width="128" height="128" xmlns="http://www.w3.org/2000/svg">
+  <rect width="128" height="128" fill="#000000"/>
+  <circle cx="64" cy="64" r="50" fill="#1d9bf0"/>
+  <text x="64" y="80" font-family="Arial, sans-serif" font-size="48" font-weight="bold" fill="#ffffff" text-anchor="middle">DM</text>
+</svg>

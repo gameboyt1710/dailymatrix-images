@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Matrix - Quick Upload</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      width: 350px;
+      padding: 20px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #000;
+      color: #fff;
+    }
+    
+    h1 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    
+    p {
+      font-size: 13px;
+      opacity: 0.7;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    
+    .upload-area {
+      border: 2px dashed rgba(29, 155, 240, 0.5);
+      border-radius: 8px;
+      padding: 30px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 15px;
+    }
+    
+    .upload-area:hover {
+      border-color: rgb(29, 155, 240);
+      background: rgba(29, 155, 240, 0.05);
+    }
+    
+    .upload-area.dragging {
+      border-color: rgb(29, 155, 240);
+      background: rgba(29, 155, 240, 0.1);
+    }
+    
+    .upload-icon {
+      font-size: 40px;
+      margin-bottom: 10px;
+    }
+    
+    .upload-text {
+      font-size: 14px;
+      color: rgb(29, 155, 240);
+      font-weight: 500;
+    }
+    
+    #fileInput {
+      display: none;
+    }
+    
+    .result {
+      display: none;
+      padding: 15px;
+      background: rgba(29, 155, 240, 0.1);
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+    
+    .result.show {
+      display: block;
+    }
+    
+    .result-url {
+      font-size: 12px;
+      word-break: break-all;
+      padding: 10px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 4px;
+      margin: 10px 0;
+      user-select: all;
+    }
+    
+    .copy-btn {
+      width: 100%;
+      padding: 10px;
+      background: rgb(29, 155, 240);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    
+    .copy-btn:hover {
+      background: rgb(26, 140, 216);
+    }
+    
+    .copy-btn:active {
+      transform: scale(0.98);
+    }
+    
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
+    
+    .loading.show {
+      display: block;
+    }
+    
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(29, 155, 240, 0.2);
+      border-top-color: rgb(29, 155, 240);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .footer {
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: center;
+      font-size: 12px;
+      opacity: 0.5;
+    }
+    
+    .footer a {
+      color: rgb(29, 155, 240);
+      text-decoration: none;
+    }
+    
+    .error {
+      display: none;
+      padding: 15px;
+      background: rgba(255, 0, 0, 0.1);
+      border-radius: 8px;
+      margin-bottom: 15px;
+      color: #ff4444;
+    }
+    
+    .error.show {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <h1>🔥 Daily Matrix</h1>
+  <p>Upload an image to get a shareable link that protects your art from AI scraping.</p>
+  
+  <div class="upload-area" id="uploadArea">
+    <div class="upload-icon">📸</div>
+    <div class="upload-text">Click or drag to upload</div>
+    <div style="font-size: 11px; opacity: 0.5; margin-top: 5px;">PNG, JPG, or WebP</div>
+  </div>
+  
+  <input type="file" id="fileInput" accept="image/png,image/jpeg,image/webp">
+  
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <div>Uploading...</div>
+  </div>
+  
+  <div class="error" id="error"></div>
+  
+  <div class="result" id="result">
+    <div style="font-weight: bold; margin-bottom: 8px;">✅ Upload successful!</div>
+    <div class="result-url" id="resultUrl"></div>
+    <button class="copy-btn" id="copyBtn">Copy Link</button>
+  </div>
+  
+  <div class="footer">
+    <a href="https://thedailymatrix.com" target="_blank">thedailymatrix.com</a>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
