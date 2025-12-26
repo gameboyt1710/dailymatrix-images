@@ -117,6 +117,9 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
 });
 
+// Serve static preview image
+app.use(express.static(path.join(__dirname, 'public')));
+
 // GET / - Upload form
 app.get('/', (req, res) => {
   // Generate artist spotlight HTML
@@ -166,7 +169,22 @@ app.get('/', (req, res) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Image Upload for X/Twitter</title>
+  <title>Image Upload for X/Twitter - Protect Your Art from Grok AI</title>
+  
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="${BASE_URL}/">
+  <meta property="og:title" content="Protect Your Art from Grok AI">
+  <meta property="og:description" content="Upload images and share them on X/Twitter without Grok's edit feature. Your art stays protected.">
+  <meta property="og:image" content="${BASE_URL}/preview.png">
+  
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="${BASE_URL}/">
+  <meta name="twitter:title" content="Protect Your Art from Grok AI">
+  <meta name="twitter:description" content="Upload images and share them on X/Twitter without Grok's edit feature. Your art stays protected.">
+  <meta name="twitter:image" content="${BASE_URL}/preview.png">
+  
   <style>
     :root {
       --bg-color: #ffffff;
