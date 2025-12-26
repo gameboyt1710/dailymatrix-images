@@ -1087,6 +1087,135 @@ app.get('/img/:id', async (req, res) => {
   }
 });
 
+// GET /privacy - Privacy policy page
+app.get('/privacy', (req, res) => {
+  res.send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy - The Daily Matrix</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --text: #000000;
+      --border: #e0e0e0;
+      --link-color: #1d9bf0;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #000000;
+        --text: #ffffff;
+        --border: #333333;
+      }
+    }
+    
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    
+    h1 { margin-bottom: 10px; }
+    h2 { margin-top: 30px; }
+    a { color: var(--link-color); }
+    .back-link { margin-bottom: 20px; display: inline-block; }
+  </style>
+</head>
+<body>
+  <a href="/" class="back-link">← Back to Home</a>
+  
+  <h1>Privacy Policy</h1>
+  <p><em>Last updated: December 26, 2025</em></p>
+
+  <h2>What We Collect</h2>
+  <p>The Daily Matrix browser extension and website collect <strong>no personal data</strong>.</p>
+
+  <h3>Data Storage</h3>
+  <ul>
+    <li><strong>Padding Preference</strong>: Stored locally in your browser using Chrome Storage API</li>
+    <li><strong>Submitted Twitter Handles</strong>: When you voluntarily submit your Twitter handle via the "Join the Rebellion" form, it is sent to our server and stored in our database</li>
+    <li><strong>Uploaded Images</strong>: Images you upload are stored on our servers for hosting purposes</li>
+  </ul>
+
+  <h3>Data We Don't Collect</h3>
+  <ul>
+    <li>Browsing history</li>
+    <li>Personal information</li>
+    <li>Twitter credentials</li>
+    <li>Analytics or tracking data</li>
+    <li>Cookies (except essential session cookies)</li>
+    <li>IP addresses (beyond standard server logs)</li>
+  </ul>
+
+  <h2>How The Extension Works</h2>
+  <ol>
+    <li><strong>Content Script</strong>: Only runs on twitter.com and x.com. Adds an upload button to the tweet composer.</li>
+    <li><strong>Popup</strong>: Allows manual uploads when you click the extension icon.</li>
+    <li><strong>Image Uploads</strong>: When you select an image, it's uploaded directly to thedailymatrix.com via HTTPS.</li>
+  </ol>
+
+  <h2>Data Processing</h2>
+  <ul>
+    <li>Images uploaded through the extension or website are stored on our servers at thedailymatrix.com</li>
+    <li>Image data is stored in a PostgreSQL database hosted on Railway</li>
+    <li>We do not scan, analyze, or use your images for any purpose other than hosting and displaying them</li>
+    <li>Your images are publicly accessible via the unique URL provided after upload</li>
+  </ul>
+
+  <h2>Third-Party Services</h2>
+  <ul>
+    <li><strong>Railway</strong>: Our hosting provider (thedailymatrix.com is hosted on Railway)</li>
+    <li>No analytics services</li>
+    <li>No advertising networks</li>
+    <li>No third-party trackers</li>
+  </ul>
+
+  <h2>Your Rights</h2>
+  <p>You have the right to:</p>
+  <ul>
+    <li>Request deletion of images you've uploaded</li>
+    <li>Request deletion of your submitted Twitter handle</li>
+    <li>Use the service completely anonymously</li>
+  </ul>
+
+  <h2>Data Retention</h2>
+  <ul>
+    <li>Uploaded images are stored indefinitely unless you request deletion</li>
+    <li>Submitted artist handles are stored in our database for the rebellion list feature</li>
+  </ul>
+
+  <h2>Security</h2>
+  <ul>
+    <li>All data transmission uses HTTPS encryption</li>
+    <li>Database access is restricted and password-protected</li>
+    <li>We follow industry-standard security practices</li>
+  </ul>
+
+  <h2>Changes to This Policy</h2>
+  <p>We may update this privacy policy from time to time. We will notify users by updating the "Last updated" date at the top of this page.</p>
+
+  <h2>Contact</h2>
+  <p>Questions about privacy? Contact: <a href="https://twitter.com/shinypants1710" target="_blank">@shinypants1710</a></p>
+
+  <h2>Open Source</h2>
+  <p>This extension and website are open source. You can review the code at: <a href="https://github.com/gameboyt1710/dailymatrix-images" target="_blank">github.com/gameboyt1710/dailymatrix-images</a></p>
+
+  <hr style="margin: 40px 0; border: 1px solid var(--border);">
+
+  <p style="text-align: center; opacity: 0.7; font-size: 0.9em;">
+    Made with 🔥 by artists, for artists<br>
+    <a href="/">thedailymatrix.com</a>
+  </p>
+</body>
+</html>`);
+});
+
 // POST /api/submit-artist - Submit artist handle for rebellion list
 app.post('/api/submit-artist', async (req, res) => {
   const { handle } = req.body;
