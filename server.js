@@ -176,7 +176,7 @@ app.get('/', (req, res) => {
   <meta property="og:url" content="${BASE_URL}/">
   <meta property="og:title" content="Protect Your Art from Grok AI">
   <meta property="og:description" content="Upload images and share them on X/Twitter without Grok's edit feature. Your art stays protected.">
-  <meta property="og:image" content="${BASE_URL}/debug%20kitty.jpg">
+  <meta property="og:image" content="${BASE_URL}/preview.jpg">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
   
@@ -185,7 +185,7 @@ app.get('/', (req, res) => {
   <meta name="twitter:url" content="${BASE_URL}/">
   <meta name="twitter:title" content="Protect Your Art from Grok AI">
   <meta name="twitter:description" content="Upload images and share them on X/Twitter without Grok's edit feature. Your art stays protected.">
-  <meta name="twitter:image" content="${BASE_URL}/debug%20kitty.jpg">
+  <meta name="twitter:image" content="${BASE_URL}/preview.jpg">
   
   <style>
     :root {
