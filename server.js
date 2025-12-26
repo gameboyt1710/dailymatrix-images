@@ -335,38 +335,26 @@ app.post('/upload', upload.single('file'), async (req, res) => {
       const targetRatio = 2;
       const currentRatio = width / height;
 
-      let newWidth, newHeight, bgWidth, bgHeight;
+      let bgWidth, bgHeight;
 
-      // Create 2:1 aspect ratio with letterboxing/pillarboxing
+      // Create 2:1 aspect ratio canvas
       if (currentRatio > targetRatio) {
-        // Image is wider than 2:1, fit to width
+        // Image is wider than 2:1, add padding top/bottom
         bgWidth = width;
         bgHeight = Math.round(width / targetRatio);
-        newWidth = width;
-        newHeight = height;
       } else {
-        // Image is taller than 2:1, fit to height
+        // Image is taller than 2:1, add padding left/right
         bgHeight = height;
         bgWidth = Math.round(height * targetRatio);
-        newWidth = width;
-        newHeight = height;
       }
 
-      // Create canvas with black background and composite image
-      imageBuffer = await sharp({
-        create: {
-          width: bgWidth,
-          height: bgHeight,
-          channels: 4,
-          background: { r: 0, g: 0, b: 0, alpha: 1 }
-        }
-      })
-      .composite([{
-        input: await image.resize(newWidth, newHeight, { fit: 'inside' }).toBuffer(),
-        gravity: 'center'
-      }])
-      .png() // Convert to PNG for transparency support
-      .toBuffer();
+      // Resize the image to fit within the canvas while maintaining aspect ratio
+      const resizedImage = await image.resize(bgWidth, bgHeight, {
+        fit: 'contain',
+        background: { r: 0, g: 0, b: 0, alpha: 1 }
+      }).png().toBuffer();
+
+      imageBuffer = resizedImage;
 
       mimetype = 'image/png';
     } catch (err) {
