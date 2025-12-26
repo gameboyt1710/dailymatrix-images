@@ -140,8 +140,8 @@ app.get('/', (req, res) => {
     ? `
     <div class="artist-waterfall left">
       ${repeatedArtists.map((artist, i) => {
-        const offset = Math.random() * 300; // Random offset between 0 and 300px
-        const verticalGap = 40 + Math.random() * 40; // Random gap between 40-90px
+        const offset = Math.random() * 250; // Random offset between 0 and 300px
+        const verticalGap = 30 + Math.random() * 40; // Random gap between 40-90px
         return `
         <a href="${artist.link}" target="_blank" rel="noopener noreferrer" 
            style="transform: translateX(${offset}px); margin-bottom: ${verticalGap}px">${artist.handle}</a>
@@ -150,8 +150,8 @@ app.get('/', (req, res) => {
     </div>
     <div class="artist-waterfall right">
       ${repeatedArtists.map((artist, i) => {
-        const offset = Math.random() * 300; // Random offset between 0 and 150px
-        const verticalGap = 40 + Math.random() * 40; // Random gap between 20-60px
+        const offset = Math.random() * 250; // Random offset between 0 and 150px
+        const verticalGap = 30 + Math.random() * 40; // Random gap between 20-60px
         return `
         <a href="${artist.link}" target="_blank" rel="noopener noreferrer" 
            style="transform: translateX(-${offset}px); margin-bottom: ${verticalGap}px">${artist.handle}</a>
