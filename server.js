@@ -16,6 +16,10 @@ const ARTIST_SPOTLIGHTS = [
     handle: '@shinypants1710',
     link: 'https://twitter.com/shinypants1710'
   },
+  {
+    handle: '@cute_and_dumb',
+    link: 'https://twitter.com/cute_and_dumb'
+  },
   // Add more artists here - just add their @handle and Twitter link
 ];
 
