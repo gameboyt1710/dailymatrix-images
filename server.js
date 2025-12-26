@@ -1580,6 +1580,15 @@ app.patch('/api/admin/submissions/:id', async (req, res) => {
   }
 });
 
+// Robots.txt route
+app.get('/robots.txt', (req, res) => {
+  res.type('text/plain');
+  res.send(`User-agent: *
+Allow: /
+
+Content-Signal: search=yes, ai-train=no`);
+});
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err);
