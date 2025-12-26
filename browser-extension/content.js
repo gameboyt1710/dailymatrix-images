@@ -58,6 +58,36 @@ function injectUploadButton() {
   fileInput.accept = 'image/png,image/jpeg,image/webp';
   fileInput.style.display = 'none';
   
+  // Create padding checkbox toggle
+  const paddingToggle = document.createElement('label');
+  paddingToggle.className = 'dailymatrix-padding-toggle';
+  paddingToggle.innerHTML = `
+    <input type="checkbox" id="dailymatrix-padding-check" style="margin-right: 4px; cursor: pointer;">
+    <span style="font-size: 11px; opacity: 0.7;">Add padding</span>
+  `;
+  paddingToggle.style.cssText = `
+    display: flex;
+    align-items: center;
+    padding: 4px 8px;
+    margin: 0 4px;
+    font-size: 11px;
+    color: rgb(29, 155, 240);
+    cursor: pointer;
+    user-select: none;
+  `;
+  
+  const checkbox = paddingToggle.querySelector('input');
+  
+  // Load padding preference
+  chrome.storage.local.get(['addPadding'], (result) => {
+    checkbox.checked = result.addPadding || false;
+  });
+  
+  // Save padding preference when changed
+  checkbox.addEventListener('change', () => {
+    chrome.storage.local.set({ addPadding: checkbox.checked });
+  });
+  
   // Handle file selection
   fileInput.addEventListener('change', async (e) => {
     const file = e.target.files[0];
@@ -182,12 +212,13 @@ function injectUploadButton() {
     fileInput.click();
   });
   
-  // Insert button into toolbar (after the first child)
+  // Insert button and padding toggle into toolbar (after the first child)
   if (toolbar.firstChild) {
     toolbar.insertBefore(uploadBtn, toolbar.firstChild.nextSibling);
+    toolbar.insertBefore(paddingToggle, uploadBtn.nextSibling);
     toolbar.insertBefore(fileInput, uploadBtn);
     buttonInjected = true;
-    console.log('Daily Matrix: Upload button injected');
+    console.log('Daily Matrix: Upload button and padding toggle injected');
   }
 }
 

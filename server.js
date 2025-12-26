@@ -1002,11 +1002,51 @@ app.get('/i/:id', async (req, res) => {
       height: auto;
       border-radius: 8px;
       box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      margin-bottom: 30px;
+    }
+    
+    .cta-box {
+      margin-top: 30px;
+      padding: 20px;
+      background: var(--border);
+      border-radius: 8px;
+      text-align: center;
+    }
+    
+    .cta-box h3 {
+      margin: 0 0 10px 0;
+      font-size: 18px;
+    }
+    
+    .cta-box p {
+      margin: 0 0 15px 0;
+      opacity: 0.8;
+    }
+    
+    .cta-button {
+      display: inline-block;
+      padding: 12px 24px;
+      background: var(--link-color);
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: bold;
+      transition: opacity 0.2s;
+    }
+    
+    .cta-button:hover {
+      opacity: 0.9;
     }
   </style>
 </head>
 <body>
   <img src="${imageUrl}" alt="Artwork">
+  
+  <div class="cta-box">
+    <h3>🔥 Protect Your Art</h3>
+    <p>Upload your own images and get shareable links that bypass AI scrapers</p>
+    <a href="${BASE_URL}" class="cta-button">Make Your Own →</a>
+  </div>
 </body>
 </html>`);
   } catch (err) {
