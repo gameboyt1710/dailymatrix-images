@@ -169,6 +169,7 @@ app.get('/', (req, res) => {
       --button-bg: #007bff;
       --button-hover: #0056b3;
       --secondary-text: #666666;
+      --link-color: #1d9bf0;
     }
 
     @media (prefers-color-scheme: dark) {
@@ -182,6 +183,7 @@ app.get('/', (req, res) => {
         --button-bg: #0d6efd;
         --button-hover: #0b5ed7;
         --secondary-text: #a0a0a0;
+        --link-color: #1d9bf0;
       }
     }
 
@@ -540,7 +542,7 @@ app.get('/success/:id', async (req, res) => {
       --button-bg: #007bff;
       --button-hover: #0056b3;
       --button-success: #28a745;
-      --link-color: #007bff;
+      --link-color: #1d9bf0;
       --secondary-text: #666666;
     }
 
@@ -554,7 +556,7 @@ app.get('/success/:id', async (req, res) => {
         --button-bg: #0d6efd;
         --button-hover: #0b5ed7;
         --button-success: #22c55e;
-        --link-color: #60a5fa;
+        --link-color: #1d9bf0;
         --secondary-text: #a0a0a0;
       }
     }
