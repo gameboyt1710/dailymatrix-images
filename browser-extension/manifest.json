@@ -19,6 +19,9 @@
     "https://x.com/*",
     "https://thedailymatrix.com/*"
   ],
+  "data_collection_permissions": {
+    "deny_on_install": true
+  },
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
