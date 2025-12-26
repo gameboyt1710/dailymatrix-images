@@ -13,11 +13,10 @@ const BASE_URL = process.env.BASE_URL || 'https://thedailymatrix.com';
 // Artist Spotlights - Update these to feature different artists!
 const ARTIST_SPOTLIGHTS = [
   {
-    name: 'Shinypants1710',
-    link: 'https://twitter.com/@shinypants1710',
-    image: '/artistimg/shinypants1710.jpg'
+    handle: '@shinypants1710',
+    link: 'https://twitter.com/shinypants1710'
   },
-  // Add more artists here
+  // Add more artists here - just add their @handle and Twitter link
 ];
 
 // Check if DATABASE_URL is provided
@@ -124,27 +123,13 @@ app.get('/', (req, res) => {
   const artistSpotlightHTML = ARTIST_SPOTLIGHTS.length > 0 ? `
   <div class="artist-spotlight">
     <h2>✨ Featured Artists</h2>
-    ${ARTIST_SPOTLIGHTS.map(artist => `
-    <a href="${artist.link}" target="_blank" rel="noopener noreferrer" class="artist-card">
-      ${artist.image ? `<img src="${artist.image}" alt="${artist.name}">` : ''}
-      <div class="artist-name">${artist.name}</div>
-    </a>
-    `).join('')}
+    <div class="artist-links">
+      ${ARTIST_SPOTLIGHTS.map(artist => `
+        <a href="${artist.link}" target="_blank" rel="noopener noreferrer" class="artist-handle">${artist.handle}</a>
+      `).join('')}
+    </div>
   </div>
   ` : '';
-
-  // Generate floating showcase spots (up to 4 random artists for the sides)
-  const showcaseArtists = ARTIST_SPOTLIGHTS.length > 0 
-    ? [...ARTIST_SPOTLIGHTS].sort(() => Math.random() - 0.5).slice(0, 4)
-    : [];
-  
-  const showcaseHTML = showcaseArtists.map((artist, i) => 
-    artist.image ? `
-    <a href="${artist.link}" target="_blank" rel="noopener noreferrer" class="showcase showcase-${i < 2 ? 'left' : 'right'}-${(i % 2) + 1}">
-      <img src="${artist.image}" alt="${artist.name}">
-    </a>
-    ` : ''
-  ).join('');
 
   res.send(`<!DOCTYPE html>
 <html lang="en">
@@ -199,60 +184,6 @@ app.get('/', (req, res) => {
       margin: 30px auto;
       position: relative;
       z-index: 1;
-    }
-
-    /* Floating showcase spots */
-    .showcase {
-      position: fixed;
-      z-index: 0;
-      opacity: 0.4;
-      transition: opacity 0.3s;
-    }
-
-    .showcase:hover {
-      opacity: 0.8;
-    }
-
-    .showcase img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-    }
-
-    .showcase-left-1 {
-      left: 5%;
-      top: 15%;
-      width: 180px;
-      height: 180px;
-    }
-
-    .showcase-left-2 {
-      left: 3%;
-      top: 55%;
-      width: 140px;
-      height: 140px;
-    }
-
-    .showcase-right-1 {
-      right: 5%;
-      top: 25%;
-      width: 160px;
-      height: 160px;
-    }
-
-    .showcase-right-2 {
-      right: 4%;
-      top: 65%;
-      width: 150px;
-      height: 150px;
-    }
-
-    @media (max-width: 1200px) {
-      .showcase {
-        display: none;
-      }
     }
 
     h1 {
@@ -380,38 +311,32 @@ app.get('/', (req, res) => {
       margin-bottom: 15px;
     }
 
-    .artist-card {
+    .artist-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .artist-handle {
       display: inline-block;
-      margin: 8px;
+      padding: 8px 16px;
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      color: var(--link-color);
       text-decoration: none;
-      transition: transform 0.2s;
+      font-size: 0.95em;
+      transition: all 0.2s;
     }
 
-    .artist-card:hover {
-      transform: scale(1.05);
-    }
-
-    .artist-card img {
-      width: 120px;
-      height: 120px;
-      border-radius: 8px;
-      object-fit: cover;
-      border: 2px solid var(--border-color);
-      display: block;
-    }
-
-    .artist-card .artist-name {
-      text-align: center;
-      margin-top: 8px;
-      font-size: 0.9em;
-      color: var(--text-color);
-      font-weight: 500;
+    .artist-handle:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      border-color: var(--link-color);
     }
   </style>
 </head>
 <body>
-  ${showcaseHTML}
-  
   <div class="container">
     <h1>X/Twitter Image Preview</h1>
     
@@ -565,6 +490,7 @@ app.get('/success/:id', async (req, res) => {
       --text-color: #333333;
       --heading-color: #28a745;
       --box-bg: #f4f4f4;
+      --border-color: #e0e0e0;
       --button-bg: #007bff;
       --button-hover: #0056b3;
       --button-success: #28a745;
@@ -577,6 +503,7 @@ app.get('/success/:id', async (req, res) => {
         --text-color: #e0e0e0;
         --heading-color: #4ade80;
         --box-bg: #2a2a2a;
+        --border-color: #404040;
         --button-bg: #0d6efd;
         --button-hover: #0b5ed7;
         --button-success: #22c55e;
@@ -648,11 +575,12 @@ app.get('/success/:id', async (req, res) => {
       padding: 20px;
       background: var(--box-bg);
       border-radius: 8px;
-      text-align: left;
+      text-align: center;
     }
 
     .artist-feature h3 {
       margin-top: 0;
+      margin-bottom: 15px;
       font-size: 0.9em;
       color: var(--text-color);
       opacity: 0.8;
@@ -660,29 +588,22 @@ app.get('/success/:id', async (req, res) => {
       letter-spacing: 0.5px;
     }
 
-    .artist-link {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      text-decoration: none;
-      color: var(--text-color);
-      transition: opacity 0.2s;
-    }
-
-    .artist-link:hover {
-      opacity: 0.8;
-    }
-
-    .artist-link img {
-      width: 60px;
-      height: 60px;
-      border-radius: 6px;
-      object-fit: cover;
-    }
-
-    .artist-link div h4 {
-      margin: 0;
+    .artist-feature a {
+      display: inline-block;
+      padding: 10px 20px;
+      background: var(--bg-color);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
       color: var(--link-color);
+      text-decoration: none;
+      font-size: 1.1em;
+      transition: all 0.2s;
+    }
+
+    .artist-feature a:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      border-color: var(--link-color);
     }
   </style>
 </head>
@@ -697,12 +618,7 @@ app.get('/success/:id', async (req, res) => {
   ${randomArtist ? `
   <div class="artist-feature">
     <h3>✨ Featured Artist</h3>
-    <a href="${randomArtist.link}" target="_blank" rel="noopener noreferrer" class="artist-link">
-      ${randomArtist.image ? `<img src="${randomArtist.image}" alt="${randomArtist.name}">` : ''}
-      <div>
-        <h4>${randomArtist.name}</h4>
-      </div>
-    </a>
+    <a href="${randomArtist.link}" target="_blank" rel="noopener noreferrer">${randomArtist.handle}</a>
   </div>
   ` : ''}
 
