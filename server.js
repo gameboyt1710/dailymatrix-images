@@ -768,7 +768,7 @@ app.get('/i/:id', async (req, res) => {
   <meta name="twitter:image" content="${imageUrl}">
   
   <!-- Open Graph -->
-  <meta property="og:title" content="Image">
+  <meta property="og:title" content=" ">
   <meta property="og:type" content="website">
   <meta property="og:url" content="${pageUrl}">
   <meta property="og:image" content="${imageUrl}">
