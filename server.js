@@ -132,15 +132,19 @@ app.get('/', (req, res) => {
   ` : '';
 
   // Generate infinite scrolling waterfall on the sides
+  // Repeat the list many times to ensure continuous scrolling
+  const repeatCount = 20;
+  const repeatedArtists = Array(repeatCount).fill(ARTIST_SPOTLIGHTS).flat();
+  
   const floatingHTML = ARTIST_SPOTLIGHTS.length > 0 
     ? `
     <div class="artist-waterfall left">
-      ${[...ARTIST_SPOTLIGHTS, ...ARTIST_SPOTLIGHTS, ...ARTIST_SPOTLIGHTS].map(artist => `
+      ${repeatedArtists.map(artist => `
         <a href="${artist.link}" target="_blank" rel="noopener noreferrer">${artist.handle}</a>
       `).join('')}
     </div>
     <div class="artist-waterfall right">
-      ${[...ARTIST_SPOTLIGHTS, ...ARTIST_SPOTLIGHTS, ...ARTIST_SPOTLIGHTS].map(artist => `
+      ${repeatedArtists.map(artist => `
         <a href="${artist.link}" target="_blank" rel="noopener noreferrer">${artist.handle}</a>
       `).join('')}
     </div>
