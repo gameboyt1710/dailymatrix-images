@@ -176,14 +176,14 @@ app.get('/', (req, res) => {
   <meta property="og:url" content="${BASE_URL}/">
   <meta property="og:title" content="Protect Your Art from Grok AI">
   <meta property="og:description" content="Upload images and share them on X/Twitter without Grok's edit feature. Your art stays protected.">
-  <meta property="og:image" content="${BASE_URL}/preview.png">
+  <meta property="og:image" content="${BASE_URL}/debug%20kitty.jpg?v=${Date.now()}">
   
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:url" content="${BASE_URL}/">
   <meta name="twitter:title" content="Protect Your Art from Grok AI">
   <meta name="twitter:description" content="Upload images and share them on X/Twitter without Grok's edit feature. Your art stays protected.">
-  <meta name="twitter:image" content="${BASE_URL}/preview.png">
+  <meta name="twitter:image" content="${BASE_URL}/debug%20kitty.jpg?v=${Date.now()}">
   
   <style>
     :root {
