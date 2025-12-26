@@ -4,7 +4,8 @@
   "version": "1.0.0",
   "description": "Upload images directly from Twitter/X composer and get shareable links instantly",
   "permissions": [
-    "activeTab"
+    "activeTab",
+    "storage"
   ],
   "host_permissions": [
     "https://twitter.com/*",

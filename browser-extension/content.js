@@ -77,29 +77,33 @@ function injectUploadButton() {
     `;
     
     try {
-      // Upload to Daily Matrix
+      // Get padding preference from storage
+      let addPadding = false;
+      try {
+        const result = await chrome.storage.local.get(['addPadding']);
+        addPadding = result.addPadding || false;
+      } catch (err) {
+        console.log('Daily Matrix: Storage not available, using default padding setting');
+      }
+      
+      // Upload to Daily Matrix API
       const formData = new FormData();
       formData.append('image', file);
+      formData.append('padding', addPadding);
       
-      const response = await fetch('https://thedailymatrix.com/upload', {
+      const response = await fetch('https://thedailymatrix.com/api/upload', {
         method: 'POST',
         body: formData
       });
       
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Daily Matrix: Upload error:', errorText);
         throw new Error('Upload failed');
       }
       
-      const html = await response.text();
-      
-      // Extract the share URL from the success page redirect
-      const urlMatch = html.match(/\/success\/([a-zA-Z0-9_-]+)/);
-      if (!urlMatch) {
-        throw new Error('Could not extract image URL');
-      }
-      
-      const imageId = urlMatch[1];
-      const shareUrl = `https://thedailymatrix.com/i/${imageId}`;
+      const data = await response.json();
+      const shareUrl = data.url;
       
       console.log('Daily Matrix: Upload successful:', shareUrl);
       

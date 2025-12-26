@@ -138,6 +138,17 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Body parser for JSON
 app.use(express.json());
 
+// CORS headers for browser extension
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
 // GET / - Upload form
 app.get('/', async (req, res) => {
   // Load approved artists from database
@@ -598,6 +609,74 @@ app.post('/upload', upload.single('file'), async (req, res) => {
   } catch (err) {
     console.error('Database error:', err);
     res.status(500).send('Upload failed');
+  } finally {
+    client.release();
+  }
+});
+
+// POST /api/upload - API endpoint for browser extension (returns JSON)
+app.post('/api/upload', upload.single('image'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'No image uploaded' });
+  }
+
+  const id = generateId();
+  const filename = req.file.originalname;
+  let imageBuffer = req.file.buffer;
+  let mimetype = req.file.mimetype;
+
+  // Check if padding was requested
+  const addPadding = req.body.padding === 'true' || req.body.padding === true;
+
+  // Process image if padding is requested
+  if (addPadding) {
+    try {
+      const image = sharp(imageBuffer);
+      const metadata = await image.metadata();
+      const { width, height } = metadata;
+
+      const targetRatio = 2;
+      const currentRatio = width / height;
+
+      let bgWidth, bgHeight;
+
+      if (currentRatio > targetRatio) {
+        bgWidth = width;
+        bgHeight = Math.round(width / targetRatio);
+      } else {
+        bgHeight = height;
+        bgWidth = Math.round(height * targetRatio);
+      }
+
+      const resizedImage = await image.resize(bgWidth, bgHeight, {
+        fit: 'contain',
+        background: { r: 0, g: 0, b: 0, alpha: 1 }
+      }).png().toBuffer();
+
+      imageBuffer = resizedImage;
+      mimetype = 'image/png';
+    } catch (err) {
+      console.error('Image processing error:', err);
+    }
+  }
+
+  // Store in database
+  const client = await pool.connect();
+  try {
+    await client.query(
+      'INSERT INTO images (id, filename, data, mimetype, card_size) VALUES ($1, $2, $3, $4, $5)',
+      [id, filename, imageBuffer, mimetype, 'large']
+    );
+    
+    const shareUrl = `${BASE_URL}/i/${id}`;
+    res.json({ 
+      success: true, 
+      id: id,
+      url: shareUrl 
+    });
+  } catch (err) {
+    console.error('Database error:', err);
+    res.status(500).json({ error: 'Upload failed' });
   } finally {
     client.release();
   }

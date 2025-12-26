@@ -7,6 +7,17 @@ const result = document.getElementById('result');
 const resultUrl = document.getElementById('resultUrl');
 const copyBtn = document.getElementById('copyBtn');
 const errorDiv = document.getElementById('error');
+const paddingToggle = document.getElementById('paddingToggle');
+
+// Load padding preference
+chrome.storage.local.get(['addPadding'], (result) => {
+  paddingToggle.checked = result.addPadding || false;
+});
+
+// Save padding preference when changed
+paddingToggle.addEventListener('change', () => {
+  chrome.storage.local.set({ addPadding: paddingToggle.checked });
+});
 
 // Click to upload
 uploadArea.addEventListener('click', () => {
@@ -72,29 +83,23 @@ async function handleFile(file) {
   loading.classList.add('show');
   
   try {
-    // Upload to Daily Matrix
+    // Upload to Daily Matrix API
     const formData = new FormData();
     formData.append('image', file);
+    formData.append('padding', paddingToggle.checked);
     
-    const response = await fetch('https://thedailymatrix.com/upload', {
+    const response = await fetch('https://thedailymatrix.com/api/upload', {
       method: 'POST',
       body: formData
     });
     
     if (!response.ok) {
-      throw new Error('Upload failed');
+      const errorData = await response.json().catch(() => ({ error: 'Upload failed' }));
+      throw new Error(errorData.error || 'Upload failed');
     }
     
-    const html = await response.text();
-    
-    // Extract the share URL from the success page redirect
-    const urlMatch = html.match(/\/success\/([a-zA-Z0-9_-]+)/);
-    if (!urlMatch) {
-      throw new Error('Could not extract image URL');
-    }
-    
-    const imageId = urlMatch[1];
-    const shareUrl = `https://thedailymatrix.com/i/${imageId}`;
+    const data = await response.json();
+    const shareUrl = data.url;
     
     // Show result
     loading.classList.remove('show');
