@@ -19,25 +19,16 @@ function injectUploadButton() {
     
     console.log('Daily Matrix: Found new Twitter composer toolbar');
     
-    // Find the container that has the toolbar and other elements
-    // We want to place our buttons below the toolbar, near the drafts button area
-    const composerParent = toolbar.closest('[data-testid="tweetTextarea_0"]')?.parentElement?.parentElement;
-    
-    if (!composerParent) {
-      console.log('Daily Matrix: Could not find composer parent');
-      return;
-    }
-    
-    // Create container for our buttons (below the main toolbar)
+    // Create container for our buttons (will be inserted after toolbar)
     const buttonContainer = document.createElement('div');
     buttonContainer.className = 'dailymatrix-button-container';
     buttonContainer.style.cssText = `
       display: flex;
       align-items: center;
-      gap: 8px;
-      padding: 8px 16px;
+      gap: 12px;
+      padding: 12px 16px;
       border-top: 1px solid rgb(47, 51, 54);
-      margin-top: 8px;
+      background: transparent;
     `;
     
     // Create our upload button
@@ -240,13 +231,14 @@ function injectUploadButton() {
     buttonContainer.appendChild(paddingToggle);
     buttonContainer.appendChild(fileInput);
     
-    // Insert button container below the toolbar
-    // Find a good insertion point (after the toolbar's parent)
-    const insertAfter = toolbar.parentElement;
-    if (insertAfter && insertAfter.parentElement) {
-      insertAfter.parentElement.insertBefore(buttonContainer, insertAfter.nextSibling);
+    // Insert button container after the toolbar
+    // Try multiple insertion strategies
+    if (toolbar.parentElement) {
+      toolbar.parentElement.insertBefore(buttonContainer, toolbar.nextSibling);
       injectedComposers.add(toolbar);
       console.log('Daily Matrix: Upload button and padding toggle injected');
+    } else {
+      console.log('Daily Matrix: Could not find toolbar parent for insertion');
     }
   });
 }
