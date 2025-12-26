@@ -141,20 +141,6 @@ app.get('/', (req, res) => {
     </div>
 
     <div class="form-group">
-      <label>Card Size:</label>
-      <div class="radio-group">
-        <div class="radio-option">
-          <input type="radio" id="large" name="cardSize" value="large" checked>
-          <label for="large" style="display: inline; font-weight: normal;">Large (2:1) - Big preview</label>
-        </div>
-        <div class="radio-option">
-          <input type="radio" id="square" name="cardSize" value="square">
-          <label for="square" style="display: inline; font-weight: normal;">Square (1:1) - Smaller preview</label>
-        </div>
-      </div>
-    </div>
-
-    <div class="form-group">
       <label>Add Padding:</label>
       <div class="radio-group">
         <div class="radio-option">
