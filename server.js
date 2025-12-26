@@ -122,7 +122,7 @@ app.get('/', (req, res) => {
   // Generate artist spotlight HTML
   const artistSpotlightHTML = ARTIST_SPOTLIGHTS.length > 0 ? `
   <div class="artist-spotlight">
-    <h2>✨ Featured Artists</h2>
+    <h2>Featured Artists</h2>
     <div class="artist-links">
       ${ARTIST_SPOTLIGHTS.map(artist => `
         <a href="${artist.link}" target="_blank" rel="noopener noreferrer" class="artist-handle">${artist.handle}</a>
@@ -130,6 +130,27 @@ app.get('/', (req, res) => {
     </div>
   </div>
   ` : '';
+
+  // Generate floating artist handles (staggered on the sides)
+  const positions = [
+    { left: '8%', top: '15%' },
+    { left: '5%', top: '45%' },
+    { left: '10%', top: '70%' },
+    { right: '8%', top: '20%' },
+    { right: '6%', top: '50%' },
+    { right: '10%', top: '75%' },
+  ];
+  
+  const floatingHTML = ARTIST_SPOTLIGHTS.length > 0 
+    ? ARTIST_SPOTLIGHTS.slice(0, positions.length).map((artist, i) => {
+        const pos = positions[i];
+        const style = Object.entries(pos).map(([k, v]) => `${k}: ${v}`).join('; ');
+        return `
+    <div class="floating-artist" style="${style}">
+      <a href="${artist.link}" target="_blank" rel="noopener noreferrer">${artist.handle}</a>
+    </div>`;
+      }).join('')
+    : '';
 
   res.send(`<!DOCTYPE html>
 <html lang="en">
@@ -296,47 +317,72 @@ app.get('/', (req, res) => {
       background: var(--button-hover);
     }
 
+    /* Floating artist handles on the sides */
+    .floating-artist {
+      position: fixed;
+      z-index: 0;
+      font-size: 0.9em;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+    }
+
+    .floating-artist:hover {
+      opacity: 1;
+    }
+
+    .floating-artist a {
+      color: var(--link-color);
+      text-decoration: none;
+    }
+
+    .floating-artist a:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 1200px) {
+      .floating-artist {
+        display: none;
+      }
+    }
+
     .artist-spotlight {
-      background: var(--info-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 20px;
       margin: 30px 0;
+      padding: 20px;
+      text-align: center;
     }
 
     .artist-spotlight h2 {
       margin-top: 0;
-      font-size: 1.1em;
-      color: var(--heading-color);
+      font-size: 0.9em;
+      color: var(--secondary-text);
       margin-bottom: 15px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
     .artist-links {
       display: flex;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 20px;
+      justify-content: center;
     }
 
     .artist-handle {
-      display: inline-block;
-      padding: 8px 16px;
-      background: var(--bg-color);
-      border: 1px solid var(--border-color);
-      border-radius: 20px;
       color: var(--link-color);
       text-decoration: none;
       font-size: 0.95em;
-      transition: all 0.2s;
+      transition: opacity 0.2s;
     }
 
     .artist-handle:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-      border-color: var(--link-color);
+      text-decoration: underline;
+      opacity: 0.8;
     }
   </style>
 </head>
 <body>
+  ${floatingHTML}
+  
   <div class="container">
     <h1>X/Twitter Image Preview</h1>
     
@@ -495,6 +541,7 @@ app.get('/success/:id', async (req, res) => {
       --button-hover: #0056b3;
       --button-success: #28a745;
       --link-color: #007bff;
+      --secondary-text: #666666;
     }
 
     @media (prefers-color-scheme: dark) {
@@ -508,6 +555,7 @@ app.get('/success/:id', async (req, res) => {
         --button-hover: #0b5ed7;
         --button-success: #22c55e;
         --link-color: #60a5fa;
+        --secondary-text: #a0a0a0;
       }
     }
 
@@ -572,38 +620,27 @@ app.get('/success/:id', async (req, res) => {
 
     .artist-feature {
       margin-top: 30px;
-      padding: 20px;
-      background: var(--box-bg);
-      border-radius: 8px;
+      padding: 15px;
       text-align: center;
     }
 
     .artist-feature h3 {
-      margin-top: 0;
-      margin-bottom: 15px;
-      font-size: 0.9em;
-      color: var(--text-color);
-      opacity: 0.8;
+      margin: 0 0 10px 0;
+      font-size: 0.85em;
+      color: var(--secondary-text);
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
     .artist-feature a {
-      display: inline-block;
-      padding: 10px 20px;
-      background: var(--bg-color);
-      border: 1px solid var(--border-color);
-      border-radius: 20px;
       color: var(--link-color);
       text-decoration: none;
-      font-size: 1.1em;
-      transition: all 0.2s;
+      font-size: 1em;
     }
 
     .artist-feature a:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-      border-color: var(--link-color);
+      text-decoration: underline;
+      opacity: 0.8;
     }
   </style>
 </head>
