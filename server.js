@@ -13,9 +13,9 @@ const BASE_URL = process.env.BASE_URL || 'https://thedailymatrix.com';
 // Artist Spotlights - Update these to feature different artists!
 const ARTIST_SPOTLIGHTS = [
   {
-    name: 'Artist Name',
-    link: 'https://twitter.com/artist',
-    image: 'https://example.com/artist-work.jpg'
+    name: 'Shinypants1710',
+    link: 'https://twitter.com/@shinypants1710',
+    image: '/artistimg/shinypants1710.jpg'
   },
   // Add more artists here
 ];
