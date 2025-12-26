@@ -317,10 +317,10 @@ app.get('/', (req, res) => {
     /* Infinite scrolling waterfall of artist handles on the sides */
     @keyframes scroll-down {
       0% {
-        transform: translateY(0);
+        transform: translateY(-100%);
       }
       100% {
-        transform: translateY(100%);
+        transform: translateY(100vh);
       }
     }
 
@@ -335,12 +335,12 @@ app.get('/', (req, res) => {
 
     .artist-waterfall.left {
       left: 5%;
-      top: -100%;
+      top: 0;
     }
 
     .artist-waterfall.right {
       right: 5%;
-      top: -100%;
+      top: 0;
       animation-delay: -15s;
     }
 
