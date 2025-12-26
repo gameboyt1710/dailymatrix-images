@@ -1,5 +1,10 @@
 {
   "manifest_version": 3,
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "twitart@thedailymatrix.com"
+    }
+  },
   "name": "The Daily Matrix - Quick Upload",
   "version": "1.0.0",
   "description": "Upload images directly from Twitter/X composer and get shareable links instantly",
