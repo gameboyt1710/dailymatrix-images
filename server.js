@@ -362,20 +362,13 @@ app.get('/i/:id', async (req, res) => {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Image</title>
   
-  <!-- Open Graph -->
-  <meta property="og:type" content="website">
-  <meta property="og:url" content="${pageUrl}">
-  <meta property="og:title" content="Image">
-  <meta property="og:image" content="${imageUrl}">
-  <meta property="og:image:secure_url" content="${imageUrl}">
-  <meta property="og:image:type" content="${imageType}">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  
   <!-- Twitter Card -->
   <meta name="twitter:card" content="${cardType}">
-  <meta name="twitter:title" content="Image">
   <meta name="twitter:image" content="${imageUrl}">
+  
+  <!-- Open Graph -->
+  <meta property="og:image" content="${imageUrl}">
+  <meta property="og:image:type" content="${imageType}">
   
   <style>
     body { font-family: system-ui, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; text-align: center; }
@@ -411,10 +404,15 @@ app.get('/img/:id', async (req, res) => {
     }
 
     const record = result.rows[0];
+    
+    console.log(`✅ Image found: ${record.mimetype}, size: ${record.data.length} bytes`);
+    
     res.setHeader('Content-Type', record.mimetype);
     res.setHeader('Cache-Control', 'public, max-age=31536000');
+    res.setHeader('Content-Length', record.data.length);
     res.send(record.data);
   } catch (err) {
+    console.error('❌ Image serve error:', err);
     res.status(500).send('Database error');
   } finally {
     client.release();
