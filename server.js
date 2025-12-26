@@ -132,6 +132,15 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
 });
 
+// Robots.txt route (MUST come before static middleware)
+app.get('/robots.txt', (req, res) => {
+  res.type('text/plain');
+  res.send(`User-agent: *
+Allow: /
+
+Content-Signal: search=yes, ai-train=no`);
+});
+
 // Serve static preview image
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -1578,15 +1587,6 @@ app.patch('/api/admin/submissions/:id', async (req, res) => {
   } finally {
     client.release();
   }
-});
-
-// Robots.txt route
-app.get('/robots.txt', (req, res) => {
-  res.type('text/plain');
-  res.send(`User-agent: *
-Allow: /
-
-Content-Signal: search=yes, ai-train=no`);
 });
 
 // Error handling middleware
