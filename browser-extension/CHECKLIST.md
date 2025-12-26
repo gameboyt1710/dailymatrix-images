@@ -3,16 +3,23 @@
 ## Before Submitting
 
 ### Icons (GET FROM YOUR ARTIST FRIENDS! 🎨)
-- [ ] icon16.png (16x16px)
-- [ ] icon48.png (48x48px)
-- [ ] icon128.png (128x128px)
-- [ ] icon512.png (512x512px) - for store listing
+- [ ] icon16.png (16x16px) - Browser toolbar small icon
+- [ ] icon48.png (48x48px) - Extension management page
+- [ ] icon128.png (128x128px) - Extension management page & Chrome Web Store
+- [ ] icon512.png (512x512px) - **Chrome Web Store listing only** (not in extension, just for the store page)
+- [ ] (Optional) Custom SVG icon for the tweet composer button
 
 **Icon Tips:**
 - High contrast, recognizable at small sizes
 - Use brand blue (#1d9bf0)
 - PNG with transparency
 - No thin lines or tiny text
+- icon512.png is ONLY for the Chrome Web Store product page, not included in the extension package
+
+### Composer Button Icon (Optional)
+Want a custom icon for the upload button in tweets? Create a file:
+- [ ] `icons/button-icon.svg` - Icon shown in the tweet composer button (20x20px recommended)
+- If not provided, the extension uses a default icon
 
 ### Screenshots (Take these yourself)
 - [ ] Twitter composer with Daily Matrix button visible

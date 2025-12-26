@@ -31,14 +31,40 @@ function injectUploadButton() {
       background: transparent;
     `;
     
-    // Create our upload button
-    const uploadBtn = document.createElement('button');
-    uploadBtn.className = 'dailymatrix-upload-btn';
-    uploadBtn.innerHTML = `
+    // Load custom button icon if exists, otherwise use default
+    let buttonIconSvg = `
       <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
         <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
         <circle cx="12" cy="12" r="2"/>
       </svg>
+    `;
+    
+    // Try to load custom icon from extension
+    try {
+      const customIconUrl = chrome.runtime.getURL('icons/button-icon.svg');
+      fetch(customIconUrl)
+        .then(response => {
+          if (response.ok) {
+            return response.text();
+          }
+        })
+        .then(svgContent => {
+          if (svgContent) {
+            buttonIconSvg = svgContent;
+          }
+        })
+        .catch(() => {
+          // Silently fail and use default icon
+        });
+    } catch (e) {
+      // Silently fail and use default icon
+    }
+    
+    // Create our upload button
+    const uploadBtn = document.createElement('button');
+    uploadBtn.className = 'dailymatrix-upload-btn';
+    uploadBtn.innerHTML = `
+      ${buttonIconSvg}
       <span style="margin-left: 6px;">Daily Matrix Upload</span>
     `;
     uploadBtn.title = 'Upload image to Daily Matrix';

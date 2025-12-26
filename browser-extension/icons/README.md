@@ -12,9 +12,10 @@ This folder contains placeholder icons for the browser extension.
 To replace with your own custom icons:
 
 1. Create PNG files in these sizes:
-   - `icon16.png` (16x16px)
-   - `icon48.png` (48x48px)
-   - `icon128.png` (128x128px)
+   - `icon16.png` (16x16px) - Browser toolbar small icon
+   - `icon48.png` (48x48px) - Extension management page
+   - `icon128.png` (128x128px) - Extension management page & Chrome Web Store
+   - `icon512.png` (512x512px) - **Chrome Web Store listing only** (not packaged in extension ZIP)
 
 2. Place them in this folder
 
@@ -26,6 +27,20 @@ To replace with your own custom icons:
      "128": "icons/icon128.png"
    }
    ```
+
+## Optional: Custom Composer Button Icon
+
+Want a custom icon for the upload button that appears in tweets?
+
+1. Create `button-icon.svg` (20x20px recommended)
+2. Place it in this folder
+3. The extension will automatically use it if present
+4. If not provided, uses default upload icon
+
+The button icon should be:
+- Simple and recognizable at small sizes
+- SVG format for crisp rendering
+- Works well in light and dark themes
 
 ## Design Tips:
 - Use a simple, recognizable design
