@@ -135,6 +135,9 @@ const upload = multer({
 // Serve static preview image
 app.use(express.static(path.join(__dirname, 'public')));
 
+// Body parser for JSON
+app.use(express.json());
+
 // GET / - Upload form
 app.get('/', (req, res) => {
   // Generate artist spotlight HTML
@@ -973,14 +976,6 @@ app.post('/api/submit-artist', async (req, res) => {
 
 // GET /admin - Admin page for reviewing artist submissions (simple password protection)
 app.get('/admin', (req, res) => {
-  const auth = req.headers.authorization;
-  const adminPassword = process.env.ADMIN_PASSWORD || 'changeme123';
-  
-  if (!auth || auth !== `Bearer ${adminPassword}`) {
-    res.setHeader('WWW-Authenticate', 'Bearer');
-    return res.status(401).send('Unauthorized');
-  }
-  
   res.send(`
 <!DOCTYPE html>
 <html lang="en">
@@ -1062,15 +1057,74 @@ app.get('/admin', (req, res) => {
   </style>
 </head>
 <body>
-  <h1>🔥 Rebellion List - Artist Submissions</h1>
-  <p>Review and approve artists to add them to the spotlight waterfall.</p>
-  
-  <div id="submissions">Loading...</div>
+  <div id="loginForm" style="display: none;">
+    <h1>🔥 Admin Login</h1>
+    <form onsubmit="handleLogin(event)" style="max-width: 400px; margin: 50px auto;">
+      <input 
+        type="password" 
+        id="passwordInput" 
+        placeholder="Enter admin password" 
+        style="width: 100%; padding: 12px; border: 2px solid var(--border); border-radius: 4px; background: var(--bg); color: var(--text); font-size: 1em; margin-bottom: 10px;"
+        required
+      />
+      <button type="submit" style="width: 100%; padding: 12px; background: var(--link-color); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; font-weight: bold;">
+        Login
+      </button>
+      <div id="loginError" style="color: #ff0000; margin-top: 10px; display: none;"></div>
+    </form>
+  </div>
+
+  <div id="adminPanel" style="display: none;">
+    <h1>🔥 Rebellion List - Artist Submissions</h1>
+    <p>Review and approve artists to add them to the spotlight waterfall. <button onclick="logout()" style="padding: 6px 12px; background: #ff0000; color: white; border: none; border-radius: 4px; cursor: pointer; margin-left: 10px;">Logout</button></p>
+    
+    <div id="submissions">Loading...</div>
+  </div>
   
   <script>
-    const adminPassword = localStorage.getItem('adminPassword') || prompt('Enter admin password:');
-    if (adminPassword) {
+    let adminPassword = localStorage.getItem('adminPassword');
+    
+    function handleLogin(e) {
+      e.preventDefault();
+      adminPassword = document.getElementById('passwordInput').value;
       localStorage.setItem('adminPassword', adminPassword);
+      checkAuth();
+    }
+    
+    function logout() {
+      localStorage.removeItem('adminPassword');
+      adminPassword = null;
+      document.getElementById('adminPanel').style.display = 'none';
+      document.getElementById('loginForm').style.display = 'block';
+    }
+    
+    async function checkAuth() {
+      if (!adminPassword) {
+        document.getElementById('loginForm').style.display = 'block';
+        return;
+      }
+      
+      try {
+        const response = await fetch('/api/admin/submissions', {
+          headers: { 'Authorization': \`Bearer \${adminPassword}\` }
+        });
+        
+        if (!response.ok) {
+          document.getElementById('loginError').textContent = '❌ Invalid password';
+          document.getElementById('loginError').style.display = 'block';
+          localStorage.removeItem('adminPassword');
+          document.getElementById('loginForm').style.display = 'block';
+          return;
+        }
+        
+        document.getElementById('loginForm').style.display = 'none';
+        document.getElementById('adminPanel').style.display = 'block';
+        loadSubmissions();
+      } catch (err) {
+        document.getElementById('loginError').textContent = '❌ Connection error';
+        document.getElementById('loginError').style.display = 'block';
+        document.getElementById('loginForm').style.display = 'block';
+      }
     }
     
     async function loadSubmissions() {
@@ -1147,8 +1201,15 @@ app.get('/admin', (req, res) => {
       }
     }
     
-    loadSubmissions();
-    setInterval(loadSubmissions, 10000); // Refresh every 10s
+    // Check auth on page load
+    checkAuth();
+    
+    // Auto-refresh submissions every 10s if logged in
+    setInterval(() => {
+      if (adminPassword && document.getElementById('adminPanel').style.display !== 'none') {
+        loadSubmissions();
+      }
+    }, 10000);
   </script>
 </body>
 </html>
