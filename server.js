@@ -140,8 +140,8 @@ app.get('/', (req, res) => {
     ? `
     <div class="artist-waterfall left">
       ${repeatedArtists.map((artist, i) => {
-        const offset = Math.random() * 150; // Random offset between 0 and 150px
-        const verticalGap = 20 + Math.random() * 40; // Random gap between 20-60px
+        const offset = Math.random() * 200; // Random offset between 0 and 150px
+        const verticalGap = 20 + Math.random() * 20; // Random gap between 20-60px
         return `
         <a href="${artist.link}" target="_blank" rel="noopener noreferrer" 
            style="transform: translateX(${offset}px); margin-bottom: ${verticalGap}px">${artist.handle}</a>
