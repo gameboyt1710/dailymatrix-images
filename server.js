@@ -132,21 +132,27 @@ app.get('/', (req, res) => {
   ` : '';
 
   // Generate infinite scrolling waterfall on the sides
-  // Repeat the list many times to ensure continuous scrolling
-  const repeatCount = 20;
+  // Repeat the list enough times to ensure continuous scrolling
+  const repeatCount = 5;
   const repeatedArtists = Array(repeatCount).fill(ARTIST_SPOTLIGHTS).flat();
   
   const floatingHTML = ARTIST_SPOTLIGHTS.length > 0 
     ? `
     <div class="artist-waterfall left">
-      ${repeatedArtists.map(artist => `
-        <a href="${artist.link}" target="_blank" rel="noopener noreferrer">${artist.handle}</a>
-      `).join('')}
+      ${repeatedArtists.map((artist, i) => {
+        const offset = Math.random() * 60 - 30; // Random offset between -30px and +30px
+        return `
+        <a href="${artist.link}" target="_blank" rel="noopener noreferrer" style="margin-left: ${offset}px">${artist.handle}</a>
+      `;
+      }).join('')}
     </div>
     <div class="artist-waterfall right">
-      ${repeatedArtists.map(artist => `
-        <a href="${artist.link}" target="_blank" rel="noopener noreferrer">${artist.handle}</a>
-      `).join('')}
+      ${repeatedArtists.map((artist, i) => {
+        const offset = Math.random() * 60 - 30; // Random offset between -30px and +30px
+        return `
+        <a href="${artist.link}" target="_blank" rel="noopener noreferrer" style="margin-right: ${offset}px">${artist.handle}</a>
+      `;
+      }).join('')}
     </div>
     `
     : '';
