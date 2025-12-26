@@ -336,6 +336,10 @@ app.get('/success/:id', async (req, res) => {
 // GET /i/:id - Image page with Open Graph meta tags (this is what Twitter reads)
 app.get('/i/:id', async (req, res) => {
   const { id } = req.params;
+  
+  // Log when Twitter's bot accesses this
+  const userAgent = req.get('User-Agent') || 'Unknown';
+  console.log(`📄 /i/${id} accessed by: ${userAgent}`);
 
   const client = await pool.connect();
   try {
@@ -394,6 +398,10 @@ app.get('/i/:id', async (req, res) => {
 // GET /img/:id - Serve the actual image file
 app.get('/img/:id', async (req, res) => {
   const { id } = req.params;
+  
+  // Log when Twitter's bot accesses the image
+  const userAgent = req.get('User-Agent') || 'Unknown';
+  console.log(`🖼️  /img/${id} accessed by: ${userAgent}`);
 
   const client = await pool.connect();
   try {
