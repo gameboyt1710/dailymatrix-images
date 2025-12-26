@@ -482,6 +482,11 @@ app.get('/', (req, res) => {
   </form>
 
   ${artistSpotlightHTML}
+  
+  <div style="text-align: center; margin-top: 40px; padding: 20px; opacity: 0.7; font-size: 0.9em;">
+    <p>This service is free and ad-free. Hosting costs money though!</p>
+    <p>☕ <a href="https://buymeacoffee.com/Shinypants" target="_blank" rel="noopener noreferrer" style="color: var(--link-color);">Buy me a coffee</a> if you find this useful</p>
+  </div>
   </div>
 </body>
 </html>`);
@@ -716,6 +721,10 @@ app.get('/success/:id', async (req, res) => {
     <a href="${randomArtist.link}" target="_blank" rel="noopener noreferrer">${randomArtist.handle}</a>
   </div>
   ` : ''}
+
+  <div style="text-align: center; margin-top: 40px; padding: 20px; opacity: 0.7; font-size: 0.85em;">
+    <p>☕ <a href="https://buymeacoffee.com/Shinypants" target="_blank" rel="noopener noreferrer" style="color: var(--link-color);">Support this service</a> - hosting isn't free!</p>
+  </div>
 
   <script>
     function copyUrl() {
