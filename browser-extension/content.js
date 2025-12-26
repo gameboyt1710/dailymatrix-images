@@ -17,29 +17,27 @@ function injectUploadButton() {
       return;
     }
     
-    console.log('Daily Matrix: Found new Twitter composer toolbar');
+    console.log('Daily Matrix: Found new Twitter composer toolbar', toolbar);
     
-    // Create container for our buttons (will be inserted after toolbar)
-    const buttonContainer = document.createElement('div');
-    buttonContainer.className = 'dailymatrix-button-container';
-    buttonContainer.style.cssText = `
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 16px;
-      border-top: 1px solid rgb(47, 51, 54);
-      background: transparent;
-    `;
-    
-    // Load custom button icon if exists, otherwise use default
-    let buttonIconSvg = `
+    // Default button icon SVG
+    const defaultIconSvg = `
       <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
         <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
         <circle cx="12" cy="12" r="2"/>
       </svg>
     `;
     
-    // Try to load custom icon from extension
+    // Create our upload button
+    const uploadBtn = document.createElement('button');
+    uploadBtn.className = 'dailymatrix-upload-btn';
+    uploadBtn.innerHTML = `
+      ${defaultIconSvg}
+      <span style="margin-left: 6px;">Daily Matrix Upload</span>
+    `;
+    uploadBtn.title = 'Upload image to Daily Matrix';
+    uploadBtn.type = 'button';
+    
+    // Try to load custom icon from extension (async, will update after button is inserted)
     try {
       const customIconUrl = chrome.runtime.getURL('icons/button-icon.svg');
       fetch(customIconUrl)
@@ -50,25 +48,19 @@ function injectUploadButton() {
         })
         .then(svgContent => {
           if (svgContent) {
-            buttonIconSvg = svgContent;
+            const span = uploadBtn.querySelector('span');
+            uploadBtn.innerHTML = svgContent;
+            if (span) {
+              uploadBtn.appendChild(span);
+            }
           }
         })
         .catch(() => {
-          // Silently fail and use default icon
+          // Silently fail and keep default icon
         });
     } catch (e) {
-      // Silently fail and use default icon
+      // Silently fail and keep default icon
     }
-    
-    // Create our upload button
-    const uploadBtn = document.createElement('button');
-    uploadBtn.className = 'dailymatrix-upload-btn';
-    uploadBtn.innerHTML = `
-      ${buttonIconSvg}
-      <span style="margin-left: 6px;">Daily Matrix Upload</span>
-    `;
-    uploadBtn.title = 'Upload image to Daily Matrix';
-    uploadBtn.type = 'button';
     
     // Style the button
     uploadBtn.style.cssText = `
@@ -253,18 +245,34 @@ function injectUploadButton() {
     });
     
     // Assemble the button container
+    const buttonContainer = document.createElement('div');
+    buttonContainer.className = 'dailymatrix-button-container';
+    buttonContainer.style.cssText = `
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-top: 1px solid rgb(47, 51, 54);
+      background: transparent;
+    `;
+    
     buttonContainer.appendChild(uploadBtn);
     buttonContainer.appendChild(paddingToggle);
     buttonContainer.appendChild(fileInput);
     
     // Insert button container after the toolbar
-    // Try multiple insertion strategies
+    console.log('Daily Matrix: Attempting insertion...', {
+      toolbar: toolbar,
+      parent: toolbar.parentElement,
+      nextSibling: toolbar.nextSibling
+    });
+    
     if (toolbar.parentElement) {
       toolbar.parentElement.insertBefore(buttonContainer, toolbar.nextSibling);
       injectedComposers.add(toolbar);
-      console.log('Daily Matrix: Upload button and padding toggle injected');
+      console.log('Daily Matrix: ✅ Upload button and padding toggle injected successfully');
     } else {
-      console.log('Daily Matrix: Could not find toolbar parent for insertion');
+      console.error('Daily Matrix: ❌ Could not find toolbar parent for insertion');
     }
   });
 }
