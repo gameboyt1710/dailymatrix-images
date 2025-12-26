@@ -30,11 +30,8 @@ function injectUploadButton() {
     // Create our upload button
     const uploadBtn = document.createElement('button');
     uploadBtn.className = 'dailymatrix-upload-btn';
-    uploadBtn.innerHTML = `
-      ${defaultIconSvg}
-      <span style="margin-left: 6px;">Daily Matrix Upload</span>
-    `;
-    uploadBtn.title = 'Upload image to Daily Matrix';
+    uploadBtn.innerHTML = defaultIconSvg;
+    uploadBtn.title = 'Upload image';
     uploadBtn.type = 'button';
     
     // Try to load custom icon from extension (async, will update after button is inserted)
@@ -48,11 +45,7 @@ function injectUploadButton() {
         })
         .then(svgContent => {
           if (svgContent) {
-            const span = uploadBtn.querySelector('span');
             uploadBtn.innerHTML = svgContent;
-            if (span) {
-              uploadBtn.appendChild(span);
-            }
           }
         })
         .catch(() => {
@@ -62,18 +55,19 @@ function injectUploadButton() {
       // Silently fail and keep default icon
     }
     
-    // Style the button
+    // Style the button - compact icon-only style
     uploadBtn.style.cssText = `
       display: flex;
       align-items: center;
-      padding: 8px 16px;
+      justify-content: center;
+      padding: 8px;
+      min-width: 36px;
+      height: 36px;
       background: rgb(29, 155, 240);
       border: none;
       border-radius: 9999px;
       cursor: pointer;
       color: white;
-      font-size: 14px;
-      font-weight: bold;
       transition: background-color 0.2s;
     `;
     
