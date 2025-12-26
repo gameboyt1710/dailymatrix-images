@@ -15,8 +15,7 @@ const ARTIST_SPOTLIGHTS = [
   {
     name: 'Artist Name',
     link: 'https://twitter.com/artist',
-    image: 'https://example.com/artist-work.jpg',
-    description: 'Beautiful digital art and illustrations'
+    image: 'https://example.com/artist-work.jpg'
   },
   // Add more artists here
 ];
@@ -128,14 +127,24 @@ app.get('/', (req, res) => {
     ${ARTIST_SPOTLIGHTS.map(artist => `
     <a href="${artist.link}" target="_blank" rel="noopener noreferrer" class="artist-card">
       ${artist.image ? `<img src="${artist.image}" alt="${artist.name}">` : ''}
-      <div class="artist-info">
-        <h3>${artist.name}</h3>
-        <p>${artist.description}</p>
-      </div>
+      <div class="artist-name">${artist.name}</div>
     </a>
     `).join('')}
   </div>
   ` : '';
+
+  // Generate floating showcase spots (up to 4 random artists for the sides)
+  const showcaseArtists = ARTIST_SPOTLIGHTS.length > 0 
+    ? [...ARTIST_SPOTLIGHTS].sort(() => Math.random() - 0.5).slice(0, 4)
+    : [];
+  
+  const showcaseHTML = showcaseArtists.map((artist, i) => 
+    artist.image ? `
+    <a href="${artist.link}" target="_blank" rel="noopener noreferrer" class="showcase showcase-${i < 2 ? 'left' : 'right'}-${(i % 2) + 1}">
+      <img src="${artist.image}" alt="${artist.name}">
+    </a>
+    ` : ''
+  ).join('');
 
   res.send(`<!DOCTYPE html>
 <html lang="en">
@@ -170,14 +179,80 @@ app.get('/', (req, res) => {
       }
     }
 
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      max-width: 650px;
-      margin: 50px auto;
+      margin: 0;
       padding: 20px;
       background-color: var(--bg-color);
       color: var(--text-color);
       transition: background-color 0.3s, color 0.3s;
+      position: relative;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 650px;
+      margin: 30px auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Floating showcase spots */
+    .showcase {
+      position: fixed;
+      z-index: 0;
+      opacity: 0.4;
+      transition: opacity 0.3s;
+    }
+
+    .showcase:hover {
+      opacity: 0.8;
+    }
+
+    .showcase img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+
+    .showcase-left-1 {
+      left: 5%;
+      top: 15%;
+      width: 180px;
+      height: 180px;
+    }
+
+    .showcase-left-2 {
+      left: 3%;
+      top: 55%;
+      width: 140px;
+      height: 140px;
+    }
+
+    .showcase-right-1 {
+      right: 5%;
+      top: 25%;
+      width: 160px;
+      height: 160px;
+    }
+
+    .showcase-right-2 {
+      right: 4%;
+      top: 65%;
+      width: 150px;
+      height: 150px;
+    }
+
+    @media (max-width: 1200px) {
+      .showcase {
+        display: none;
+      }
     }
 
     h1 {
@@ -306,64 +381,53 @@ app.get('/', (req, res) => {
     }
 
     .artist-card {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      padding: 15px;
-      background: var(--bg-color);
-      border-radius: 6px;
-      margin: 10px 0;
+      display: inline-block;
+      margin: 8px;
       text-decoration: none;
-      color: var(--text-color);
-      transition: transform 0.2s, box-shadow 0.2s;
+      transition: transform 0.2s;
     }
 
     .artist-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      transform: scale(1.05);
     }
 
     .artist-card img {
-      width: 80px;
-      height: 80px;
-      border-radius: 6px;
+      width: 120px;
+      height: 120px;
+      border-radius: 8px;
       object-fit: cover;
       border: 2px solid var(--border-color);
+      display: block;
     }
 
-    .artist-info {
-      flex: 1;
-    }
-
-    .artist-info h3 {
-      margin: 0 0 5px 0;
-      color: var(--heading-color);
-      font-size: 1em;
-    }
-
-    .artist-info p {
-      margin: 0;
+    .artist-card .artist-name {
+      text-align: center;
+      margin-top: 8px;
       font-size: 0.9em;
-      color: var(--secondary-text);
+      color: var(--text-color);
+      font-weight: 500;
     }
   </style>
 </head>
 <body>
-  <h1>X/Twitter Image Preview</h1>
+  ${showcaseHTML}
   
-  <div class="info-box">
-    <h2>How it works</h2>
-    <ol>
-      <li>Upload your image</li>
-      <li>Get a unique URL</li>
-      <li>Post that URL on Twitter/X</li>
-      <li>Your image appears as a preview card</li>
-    </ol>
-    <div class="note">
-      <strong>Why?</strong> When you post images directly to X, they can be edited by Grok AI. 
-      By hosting your image here and sharing the link instead, your art stays protected.
+  <div class="container">
+    <h1>X/Twitter Image Preview</h1>
+    
+    <div class="info-box">
+      <h2>How it works</h2>
+      <ol>
+        <li>Upload your image</li>
+        <li>Get a unique URL</li>
+        <li>Post that URL on Twitter/X</li>
+        <li>Your image appears as a preview card</li>
+      </ol>
+      <div class="note">
+        <strong>Why?</strong> When you post images directly to X, they can be edited by Grok AI. 
+        By hosting your image here and sharing the link instead, your art stays protected.
+      </div>
     </div>
-  </div>
 
   <form method="POST" action="/upload" enctype="multipart/form-data">
     <div class="form-group">
@@ -389,6 +453,7 @@ app.get('/', (req, res) => {
   </form>
 
   ${artistSpotlightHTML}
+  </div>
 </body>
 </html>`);
 });
@@ -616,14 +681,8 @@ app.get('/success/:id', async (req, res) => {
     }
 
     .artist-link div h4 {
-      margin: 0 0 5px 0;
-      color: var(--link-color);
-    }
-
-    .artist-link div p {
       margin: 0;
-      font-size: 0.9em;
-      opacity: 0.8;
+      color: var(--link-color);
     }
   </style>
 </head>
@@ -642,7 +701,6 @@ app.get('/success/:id', async (req, res) => {
       ${randomArtist.image ? `<img src="${randomArtist.image}" alt="${randomArtist.name}">` : ''}
       <div>
         <h4>${randomArtist.name}</h4>
-        <p>${randomArtist.description}</p>
       </div>
     </a>
   </div>
