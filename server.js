@@ -71,6 +71,17 @@ async function initDB() {
           ADD COLUMN IF NOT EXISTS card_size TEXT DEFAULT 'large'
         `);
         
+        // Create artist submissions table for the rebellion list
+        await client.query(`
+          CREATE TABLE IF NOT EXISTS artist_submissions (
+            id SERIAL PRIMARY KEY,
+            twitter_handle TEXT NOT NULL,
+            status TEXT DEFAULT 'pending',
+            submitted_at TIMESTAMP DEFAULT NOW(),
+            reviewed_at TIMESTAMP
+          )
+        `);
+        
         console.log('✅ Database initialized successfully');
         return;
       } finally {
@@ -726,6 +737,24 @@ app.get('/success/:id', async (req, res) => {
     <p>☕ <a href="https://buymeacoffee.com/Shinypants" target="_blank" rel="noopener noreferrer" style="color: var(--link-color);">Support this service</a> - hosting isn't free!</p>
   </div>
 
+  <div style="margin-top: 60px; padding: 30px; background: var(--bg); border: 2px solid var(--border); border-radius: 8px;">
+    <h3 style="margin-top: 0;">🔥 Join the Rebellion</h3>
+    <p style="margin-bottom: 20px; opacity: 0.8;">Add your Twitter handle to our artist spotlight - show you won't back down against AI!</p>
+    <form id="rebellionForm" style="display: flex; gap: 10px; align-items: center;">
+      <input 
+        type="text" 
+        id="twitterHandle" 
+        placeholder="@yourhandle" 
+        style="flex: 1; padding: 12px; border: 2px solid var(--border); border-radius: 4px; background: var(--bg); color: var(--text); font-size: 1em;"
+        required
+      />
+      <button type="submit" style="padding: 12px 24px; background: var(--link-color); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; font-weight: bold;">
+        Submit
+      </button>
+    </form>
+    <div id="rebellionMessage" style="margin-top: 15px; padding: 10px; border-radius: 4px; display: none;"></div>
+  </div>
+
   <script>
     function copyUrl() {
       const url = document.getElementById('url').textContent;
@@ -739,6 +768,46 @@ app.get('/success/:id', async (req, res) => {
         }, 2000);
       });
     }
+
+    // Handle rebellion form submission
+    document.getElementById('rebellionForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const handle = document.getElementById('twitterHandle').value.trim();
+      const message = document.getElementById('rebellionMessage');
+      
+      // Basic validation
+      if (!handle.startsWith('@')) {
+        message.textContent = '⚠️ Handle must start with @';
+        message.style.background = '#ff000020';
+        message.style.display = 'block';
+        return;
+      }
+      
+      try {
+        const response = await fetch('/api/submit-artist', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ handle })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok) {
+          message.textContent = '✅ ' + data.message;
+          message.style.background = '#00ff0020';
+          message.style.display = 'block';
+          document.getElementById('twitterHandle').value = '';
+        } else {
+          message.textContent = '⚠️ ' + data.error;
+          message.style.background = '#ff000020';
+          message.style.display = 'block';
+        }
+      } catch (err) {
+        message.textContent = '❌ Failed to submit. Try again later.';
+        message.style.background = '#ff000020';
+        message.style.display = 'block';
+      }
+    });
   </script>
 </body>
 </html>`);
@@ -854,6 +923,302 @@ app.get('/img/:id', async (req, res) => {
   } catch (err) {
     console.error('❌ Image serve error:', err);
     res.status(500).send('Database error');
+  } finally {
+    client.release();
+  }
+});
+
+// POST /api/submit-artist - Submit artist handle for rebellion list
+app.post('/api/submit-artist', async (req, res) => {
+  const { handle } = req.body;
+  
+  // Validate handle
+  if (!handle || !handle.startsWith('@') || handle.length < 2 || handle.length > 16) {
+    return res.status(400).json({ error: 'Invalid Twitter handle' });
+  }
+  
+  const cleanHandle = handle.toLowerCase().trim();
+  
+  const client = await pool.connect();
+  try {
+    // Check if already submitted
+    const existing = await client.query(
+      'SELECT status FROM artist_submissions WHERE LOWER(twitter_handle) = $1',
+      [cleanHandle]
+    );
+    
+    if (existing.rows.length > 0) {
+      const status = existing.rows[0].status;
+      if (status === 'pending') {
+        return res.status(400).json({ error: 'Already submitted! Awaiting review.' });
+      } else if (status === 'approved') {
+        return res.status(400).json({ error: 'You\'re already in the rebellion list!' });
+      }
+    }
+    
+    // Insert new submission
+    await client.query(
+      'INSERT INTO artist_submissions (twitter_handle, status) VALUES ($1, $2)',
+      [cleanHandle, 'pending']
+    );
+    
+    res.json({ message: 'Submitted! Your handle will be reviewed soon.' });
+  } catch (err) {
+    console.error('Artist submission error:', err);
+    res.status(500).json({ error: 'Failed to submit' });
+  } finally {
+    client.release();
+  }
+});
+
+// GET /admin - Admin page for reviewing artist submissions (simple password protection)
+app.get('/admin', (req, res) => {
+  const auth = req.headers.authorization;
+  const adminPassword = process.env.ADMIN_PASSWORD || 'changeme123';
+  
+  if (!auth || auth !== `Bearer ${adminPassword}`) {
+    res.setHeader('WWW-Authenticate', 'Bearer');
+    return res.status(401).send('Unauthorized');
+  }
+  
+  res.send(`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Artist Submissions</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --text: #000000;
+      --border: #e0e0e0;
+      --link-color: #1d9bf0;
+    }
+    
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #000000;
+        --text: #ffffff;
+        --border: #333333;
+      }
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      max-width: 1000px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: var(--bg);
+      color: var(--text);
+    }
+    
+    h1 { margin-bottom: 30px; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+    
+    th {
+      background: var(--border);
+      font-weight: bold;
+    }
+    
+    button {
+      padding: 8px 16px;
+      margin-right: 5px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    
+    .approve { background: #00ff00; color: black; }
+    .reject { background: #ff0000; color: white; }
+    .pending { opacity: 0.6; }
+    
+    .status-badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.85em;
+      font-weight: bold;
+    }
+    
+    .status-pending { background: #ffaa00; color: black; }
+    .status-approved { background: #00ff00; color: black; }
+    .status-rejected { background: #ff0000; color: white; }
+  </style>
+</head>
+<body>
+  <h1>🔥 Rebellion List - Artist Submissions</h1>
+  <p>Review and approve artists to add them to the spotlight waterfall.</p>
+  
+  <div id="submissions">Loading...</div>
+  
+  <script>
+    const adminPassword = localStorage.getItem('adminPassword') || prompt('Enter admin password:');
+    if (adminPassword) {
+      localStorage.setItem('adminPassword', adminPassword);
+    }
+    
+    async function loadSubmissions() {
+      try {
+        const response = await fetch('/api/admin/submissions', {
+          headers: { 'Authorization': \`Bearer \${adminPassword}\` }
+        });
+        
+        if (!response.ok) {
+          document.getElementById('submissions').innerHTML = '<p>❌ Unauthorized or error loading submissions</p>';
+          localStorage.removeItem('adminPassword');
+          return;
+        }
+        
+        const data = await response.json();
+        
+        if (data.submissions.length === 0) {
+          document.getElementById('submissions').innerHTML = '<p>No submissions yet!</p>';
+          return;
+        }
+        
+        const table = \`
+          <table>
+            <thead>
+              <tr>
+                <th>Twitter Handle</th>
+                <th>Status</th>
+                <th>Submitted</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              \${data.submissions.map(s => \`
+                <tr class="\${s.status === 'pending' ? '' : 'pending'}">
+                  <td><a href="https://twitter.com/\${s.twitter_handle.slice(1)}" target="_blank">\${s.twitter_handle}</a></td>
+                  <td><span class="status-badge status-\${s.status}">\${s.status}</span></td>
+                  <td>\${new Date(s.submitted_at).toLocaleString()}</td>
+                  <td>
+                    \${s.status === 'pending' ? \`
+                      <button class="approve" onclick="updateStatus(\${s.id}, 'approved')">✅ Approve</button>
+                      <button class="reject" onclick="updateStatus(\${s.id}, 'rejected')">❌ Reject</button>
+                    \` : '—'}
+                  </td>
+                </tr>
+              \`).join('')}
+            </tbody>
+          </table>
+        \`;
+        
+        document.getElementById('submissions').innerHTML = table;
+      } catch (err) {
+        document.getElementById('submissions').innerHTML = '<p>❌ Error loading submissions</p>';
+      }
+    }
+    
+    async function updateStatus(id, status) {
+      try {
+        const response = await fetch(\`/api/admin/submissions/\${id}\`, {
+          method: 'PATCH',
+          headers: {
+            'Authorization': \`Bearer \${adminPassword}\`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ status })
+        });
+        
+        if (response.ok) {
+          loadSubmissions();
+        } else {
+          alert('Failed to update status');
+        }
+      } catch (err) {
+        alert('Error updating status');
+      }
+    }
+    
+    loadSubmissions();
+    setInterval(loadSubmissions, 10000); // Refresh every 10s
+  </script>
+</body>
+</html>
+  `);
+});
+
+// GET /api/admin/submissions - Get all submissions (admin only)
+app.get('/api/admin/submissions', async (req, res) => {
+  const auth = req.headers.authorization;
+  const adminPassword = process.env.ADMIN_PASSWORD || 'changeme123';
+  
+  if (!auth || auth !== `Bearer ${adminPassword}`) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  
+  const client = await pool.connect();
+  try {
+    const result = await client.query(
+      'SELECT * FROM artist_submissions ORDER BY submitted_at DESC'
+    );
+    res.json({ submissions: result.rows });
+  } catch (err) {
+    console.error('Admin submissions error:', err);
+    res.status(500).json({ error: 'Database error' });
+  } finally {
+    client.release();
+  }
+});
+
+// PATCH /api/admin/submissions/:id - Approve or reject submission (admin only)
+app.patch('/api/admin/submissions/:id', async (req, res) => {
+  const auth = req.headers.authorization;
+  const adminPassword = process.env.ADMIN_PASSWORD || 'changeme123';
+  
+  if (!auth || auth !== `Bearer ${adminPassword}`) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  
+  const { id } = req.params;
+  const { status } = req.body;
+  
+  if (!['approved', 'rejected'].includes(status)) {
+    return res.status(400).json({ error: 'Invalid status' });
+  }
+  
+  const client = await pool.connect();
+  try {
+    // Update status
+    await client.query(
+      'UPDATE artist_submissions SET status = $1, reviewed_at = NOW() WHERE id = $2',
+      [status, id]
+    );
+    
+    // If approved, add to ARTIST_SPOTLIGHTS in memory (you'll need to manually add to code later)
+    if (status === 'approved') {
+      const result = await client.query(
+        'SELECT twitter_handle FROM artist_submissions WHERE id = $1',
+        [id]
+      );
+      
+      if (result.rows.length > 0) {
+        const handle = result.rows[0].twitter_handle;
+        console.log(`✅ APPROVED: ${handle} - Add this to ARTIST_SPOTLIGHTS array!`);
+      }
+    }
+    
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Admin update error:', err);
+    res.status(500).json({ error: 'Database error' });
   } finally {
     client.release();
   }
