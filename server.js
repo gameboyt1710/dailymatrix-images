@@ -115,25 +115,172 @@ app.get('/', (req, res) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Daily Matrix - Image Upload</title>
+  <title>Image Upload for X/Twitter</title>
   <style>
-    body { font-family: system-ui, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
-    h1 { color: #333; }
-    form { margin-top: 20px; }
-    .form-group { margin: 15px 0; }
-    label { display: block; margin-bottom: 5px; font-weight: 500; }
-    input[type="file"] { margin: 5px 0; }
-    input[type="radio"] { margin-right: 5px; }
-    .radio-group { margin: 10px 0; }
-    .radio-option { margin: 8px 0; }
-    .help-text { font-size: 0.9em; color: #666; margin-top: 3px; }
-    button { background: #007bff; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; margin-top: 10px; }
-    button:hover { background: #0056b3; }
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #333333;
+      --heading-color: #1a1a1a;
+      --border-color: #e0e0e0;
+      --info-bg: #f5f5f5;
+      --input-bg: #ffffff;
+      --button-bg: #007bff;
+      --button-hover: #0056b3;
+      --secondary-text: #666666;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-color: #1a1a1a;
+        --text-color: #e0e0e0;
+        --heading-color: #ffffff;
+        --border-color: #404040;
+        --info-bg: #2a2a2a;
+        --input-bg: #2a2a2a;
+        --button-bg: #0d6efd;
+        --button-hover: #0b5ed7;
+        --secondary-text: #a0a0a0;
+      }
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      max-width: 650px;
+      margin: 50px auto;
+      padding: 20px;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      transition: background-color 0.3s, color 0.3s;
+    }
+
+    h1 {
+      color: var(--heading-color);
+      margin-bottom: 10px;
+    }
+
+    .info-box {
+      background: var(--info-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+
+    .info-box h2 {
+      margin-top: 0;
+      font-size: 1.1em;
+      color: var(--heading-color);
+    }
+
+    .info-box ol {
+      margin: 10px 0;
+      padding-left: 20px;
+    }
+
+    .info-box li {
+      margin: 8px 0;
+      color: var(--text-color);
+    }
+
+    .info-box .note {
+      font-size: 0.9em;
+      color: var(--secondary-text);
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid var(--border-color);
+    }
+
+    form {
+      background: var(--info-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 25px;
+      margin-top: 20px;
+    }
+
+    .form-group {
+      margin: 20px 0;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+      color: var(--text-color);
+    }
+
+    input[type="file"] {
+      margin: 5px 0;
+      padding: 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      background: var(--input-bg);
+      color: var(--text-color);
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    input[type="radio"] {
+      margin-right: 8px;
+    }
+
+    .radio-group {
+      margin: 10px 0;
+    }
+
+    .radio-option {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+
+    .radio-option:hover {
+      background-color: var(--bg-color);
+    }
+
+    .radio-option label {
+      display: inline;
+      font-weight: normal;
+      cursor: pointer;
+    }
+
+    button {
+      background: var(--button-bg);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      cursor: pointer;
+      border-radius: 6px;
+      margin-top: 10px;
+      font-size: 1em;
+      font-weight: 500;
+      transition: background-color 0.2s;
+      width: 100%;
+    }
+
+    button:hover {
+      background: var(--button-hover);
+    }
   </style>
 </head>
 <body>
-  <h1>The Daily Matrix</h1>
-  <p>Upload an image to get a shareable link for Twitter/X.</p>
+  <h1>X/Twitter Image Preview</h1>
+  
+  <div class="info-box">
+    <h2>How it works</h2>
+    <ol>
+      <li>Upload your image</li>
+      <li>Get a unique URL</li>
+      <li>Post that URL on Twitter/X</li>
+      <li>Your image appears as a preview card</li>
+    </ol>
+    <div class="note">
+      <strong>Why?</strong> When you post images directly to X, they can be edited by Grok AI. 
+      By hosting your image here and sharing the link instead, your art stays protected.
+    </div>
+  </div>
+
   <form method="POST" action="/upload" enctype="multipart/form-data">
     <div class="form-group">
       <label>Select Image:</label>
@@ -145,11 +292,11 @@ app.get('/', (req, res) => {
       <div class="radio-group">
         <div class="radio-option">
           <input type="radio" id="noPadding" name="padding" value="no" checked>
-          <label for="noPadding" style="display: inline; font-weight: normal;">No - Larger image, may crop</label>
+          <label for="noPadding">No - Larger image, may crop</label>
         </div>
         <div class="radio-option">
           <input type="radio" id="yesPadding" name="padding" value="yes">
-          <label for="yesPadding" style="display: inline; font-weight: normal;">Yes - Full image visible, smaller with bars</label>
+          <label for="yesPadding">Yes - Full image visible, smaller with bars</label>
         </div>
       </div>
     </div>
@@ -283,7 +430,7 @@ app.get('/success/:id', async (req, res) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Upload Success - The Daily Matrix</title>
+  <title>Upload Success</title>
   <style>
     body { font-family: system-ui, sans-serif; max-width: 600px; margin: 50px auto; padding: 20px; }
     h1 { color: #28a745; }
@@ -350,8 +497,6 @@ app.get('/i/:id', async (req, res) => {
   
   <!-- Twitter Card -->
   <meta name="twitter:card" content="${cardType}">
-  <meta name="twitter:site" content="@thedailymatrix">
-  <meta name="twitter:creator" content="@thedailymatrix">
   <meta name="twitter:image" content="${imageUrl}">
   
   <!-- Open Graph -->
@@ -371,7 +516,6 @@ app.get('/i/:id', async (req, res) => {
 </head>
 <body>
   <img src="${imageUrl}" alt="Artwork">
-  <p class="caption">Shared via The Daily Matrix</p>
 </body>
 </html>`);
   } catch (err) {
