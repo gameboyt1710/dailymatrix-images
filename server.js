@@ -139,13 +139,38 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.json());
 
 // GET / - Upload form
-app.get('/', (req, res) => {
+app.get('/', async (req, res) => {
+  // Load approved artists from database
+  const client = await pool.connect();
+  let approvedArtists = [];
+  
+  try {
+    const result = await client.query(
+      "SELECT twitter_handle FROM artist_submissions WHERE status = 'approved' ORDER BY reviewed_at DESC"
+    );
+    
+    // Convert to artist objects with auto-generated links
+    approvedArtists = result.rows.map(row => ({
+      handle: row.twitter_handle,
+      link: `https://x.com/${row.twitter_handle.slice(1)}` // Remove @ and create x.com link
+    }));
+    
+    // Combine with hardcoded artists (keep your original ones)
+    approvedArtists = [...ARTIST_SPOTLIGHTS, ...approvedArtists];
+  } catch (err) {
+    console.error('Error loading approved artists:', err);
+    // Fall back to hardcoded list if database fails
+    approvedArtists = [...ARTIST_SPOTLIGHTS];
+  } finally {
+    client.release();
+  }
+  
   // Generate artist spotlight HTML
-  const artistSpotlightHTML = ARTIST_SPOTLIGHTS.length > 0 ? `
+  const artistSpotlightHTML = approvedArtists.length > 0 ? `
   <div class="artist-spotlight">
     <h2>Featured Artists</h2>
     <div class="artist-links">
-      ${ARTIST_SPOTLIGHTS.map(artist => `
+      ${approvedArtists.map(artist => `
         <a href="${artist.link}" target="_blank" rel="noopener noreferrer" class="artist-handle">${artist.handle}</a>
       `).join('')}
     </div>
@@ -155,9 +180,9 @@ app.get('/', (req, res) => {
   // Generate infinite scrolling waterfall on the sides
   // Repeat the list enough times to ensure continuous scrolling
   const repeatCount = 8;
-  const repeatedArtists = Array(repeatCount).fill(ARTIST_SPOTLIGHTS).flat();
+  const repeatedArtists = Array(repeatCount).fill(approvedArtists).flat();
   
-  const floatingHTML = ARTIST_SPOTLIGHTS.length > 0 
+  const floatingHTML = approvedArtists.length > 0 
     ? `
     <div class="artist-waterfall left">
       ${repeatedArtists.map((artist, i) => {
@@ -583,11 +608,23 @@ app.get('/success/:id', async (req, res) => {
   const { id } = req.params;
 
   const client = await pool.connect();
+  let approvedArtists = [];
+  
   try {
     const result = await client.query('SELECT id FROM images WHERE id = $1', [id]);
     if (result.rows.length === 0) {
       return res.status(404).send('Not found');
     }
+    
+    // Load approved artists
+    const artistResult = await client.query(
+      "SELECT twitter_handle FROM artist_submissions WHERE status = 'approved' ORDER BY reviewed_at DESC"
+    );
+    approvedArtists = artistResult.rows.map(row => ({
+      handle: row.twitter_handle,
+      link: `https://x.com/${row.twitter_handle.slice(1)}`
+    }));
+    approvedArtists = [...ARTIST_SPOTLIGHTS, ...approvedArtists];
   } catch (err) {
     return res.status(500).send('Database error');
   } finally {
@@ -597,8 +634,8 @@ app.get('/success/:id', async (req, res) => {
   const shareUrl = `${BASE_URL}/i/${id}`;
 
   // Pick a random artist to feature
-  const randomArtist = ARTIST_SPOTLIGHTS.length > 0 
-    ? ARTIST_SPOTLIGHTS[Math.floor(Math.random() * ARTIST_SPOTLIGHTS.length)]
+  const randomArtist = approvedArtists.length > 0 
+    ? approvedArtists[Math.floor(Math.random() * approvedArtists.length)]
     : null;
 
   res.send(`<!DOCTYPE html>
@@ -1263,7 +1300,7 @@ app.patch('/api/admin/submissions/:id', async (req, res) => {
       [status, id]
     );
     
-    // If approved, add to ARTIST_SPOTLIGHTS in memory (you'll need to manually add to code later)
+    // Log the action
     if (status === 'approved') {
       const result = await client.query(
         'SELECT twitter_handle FROM artist_submissions WHERE id = $1',
@@ -1272,7 +1309,17 @@ app.patch('/api/admin/submissions/:id', async (req, res) => {
       
       if (result.rows.length > 0) {
         const handle = result.rows[0].twitter_handle;
-        console.log(`✅ APPROVED: ${handle} - Add this to ARTIST_SPOTLIGHTS array!`);
+        console.log(`✅ APPROVED: ${handle} - Now appearing in artist waterfall!`);
+      }
+    } else if (status === 'rejected') {
+      const result = await client.query(
+        'SELECT twitter_handle FROM artist_submissions WHERE id = $1',
+        [id]
+      );
+      
+      if (result.rows.length > 0) {
+        const handle = result.rows[0].twitter_handle;
+        console.log(`❌ REJECTED: ${handle}`);
       }
     }
     
